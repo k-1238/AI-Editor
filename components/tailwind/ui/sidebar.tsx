@@ -48,6 +48,7 @@ export default function Sidebar() {
   const [hasNext, setHasNext] = useState(false);
   const { chats, setChats, searchStream, setChatItemHis } = useChatStore();
   const handlePaginate = useCallback(async () => {
+    console.log("handlePaginate called");
     if (isLoading) return;
     setIsLoading(true);
     try {
