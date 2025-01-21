@@ -1,0 +1,62 @@
+"use client";
+
+import {
+  type Dispatch,
+  type ReactNode,
+  type SetStateAction,
+  createContext,
+  useContext,
+} from "react";
+import { ThemeProvider, useTheme } from "next-themes";
+import { Toaster } from "sonner";
+import { Analytics } from "@vercel/analytics/react";
+import useLocalStorage from "@/hooks/use-local-storage";
+import { v4 as uuidv4 } from "uuid";
+export const AppContext = createContext<{
+  font: string;
+  setFont: Dispatch<SetStateAction<string>>;
+}>({
+  font: "Default",
+  setFont: () => {},
+});
+
+const ToasterProvider = () => {
+  const { theme } = useTheme() as {
+    theme: "light" | "dark" | "system";
+  };
+  return <Toaster theme={theme} />;
+};
+
+const SessionUUIDContext = createContext<string>("");
+
+// Helper hook to use the SessionUUID context
+export const useSessionUUID = () => {
+  const context = useContext(SessionUUIDContext);
+  if (!context) {
+    throw new Error("useSessionUUID must be used within a SessionUUIDProvider");
+  }
+  return context;
+};
+export default function Providers({ children }: { children: ReactNode }) {
+  const [font, setFont] = useLocalStorage<string>("novel__font", "Default");
+  const sessionUUID = uuidv4();
+  return (
+    <ThemeProvider
+      attribute="class"
+      enableSystem
+      disableTransitionOnChange
+      defaultTheme="system">
+      <SessionUUIDContext.Provider value={sessionUUID}>
+        <AppContext.Provider
+          value={{
+            font,
+            setFont,
+          }}>
+          <ToasterProvider />
+          {children}
+          <Analytics />
+        </AppContext.Provider>
+      </SessionUUIDContext.Provider>
+    </ThemeProvider>
+  );
+}
