@@ -20,8 +20,6 @@ import { ChartData } from "../advanced-editor";
 import { v4 as uuidv4 } from "uuid";
 import useChatStore from "@/hooks/chatStore";
 import axios from "axios";
-//TODO: I think it makes more sense to create a custom Tiptap extension for this functionality https://tiptap.dev/docs/editor/ai/introduction
-
 interface AISelectorProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -33,8 +31,8 @@ export function AISelector({ onOpenChange, setChartData }: AISelectorProps) {
   const [inputValue, setInputValue] = useState("");
   const sessionUUID = useSessionUUID();
   const [streamedOutput, setStreamedOutput] = useState("");
-  const [selectedValue = "", setSelectedValue] = useState<any>(null);
-  const [selectedOption = "", setSelectedOption] = useState<any>(null);
+  const [selectedValue, setSelectedValue] = useState<any>(null);
+  const [selectedOption, setSelectedOption] = useState<any>(null);
   const { addChat, addChatHis } = useChatStore();
   const [chartType, setChartType] = useState("");
   const [collectedMsg, setCollectedMsg] = useState<string | null>(null);
@@ -109,7 +107,6 @@ export function AISelector({ onOpenChange, setChartData }: AISelectorProps) {
         output += chunk;
         if (chartType !== "chart") setStreamedOutput((prev) => prev + chunk);
       }
-      console.log("output: ", output);
       setCollectedMsg(output);
 
       if (chartType === "chart") {
@@ -132,7 +129,6 @@ export function AISelector({ onOpenChange, setChartData }: AISelectorProps) {
     onFinish: () => {
       complete("");
     },
-
     // onError: (e) => {
     //   toast.error(e.message);
     // },
@@ -206,16 +202,16 @@ export function AISelector({ onOpenChange, setChartData }: AISelectorProps) {
                 const text = editor.storage.markdown.serializer.serialize(
                   slice.content
                 );
-                selectedValue(inputValue);
-                selectedOption("zap");
+                setSelectedValue(inputValue);
+                setSelectedOption("zap");
                 await complete(text, {
                   body: {
                     option: "zap",
-                    command: inputValue,
+                    command: text,
                     session_id: sessionUUID,
                   },
                 }).then(() => {
-                  selectedOption("zap");
+                  setSelectedOption("zap");
                 });
               }}>
               <ArrowUp className="h-4 w-4" />

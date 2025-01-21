@@ -7,7 +7,7 @@ import {
   type JSONContent,
 } from "novel";
 import { ImageResizer, handleCommandNavigation } from "novel/extensions";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import { defaultExtensions } from "./extensions";
 import { Separator } from "./ui/separator";
@@ -17,7 +17,6 @@ import GenerativeMenuSwitch from "./generative/generative-menu-switch";
 import { uploadFn } from "./image-upload";
 import { slashCommand } from "./slash-command";
 import { ChartNode } from "./ui/chart-node";
-import { NodeView } from "@tiptap/core";
 
 const hljs = require("highlight.js");
 
@@ -89,24 +88,6 @@ const TailwindAdvancedEditor = () => {
     else setInitialContent(defaultEditorContent);
   }, []);
 
-  const editorRef = useRef<EditorInstance | null>(null);
-
-  // Function to replace selected text with new text
-  const replaceSelectedText = (newText: string) => {
-    console.log("nexText: ", newText);
-
-    console.log("current: ", editorRef.current);
-    if (editorRef.current) {
-      const { state } = editorRef.current;
-      const { from, to } = state.selection;
-      console.log("position: ", from, to, state);
-      if (from !== to) {
-        // Replace selected text with the new text
-        editorRef.current.commands.insertContent(newText);
-      }
-    }
-  };
-
   return (
     <div className="relative w-full max-w-screen-lg">
       <div className="flex absolute right-5 top-5 z-10 mb-5 gap-3">
@@ -154,13 +135,6 @@ const TailwindAdvancedEditor = () => {
             setChartData={setChartData}>
             <Separator orientation="vertical" />
           </GenerativeMenuSwitch>
-          <button
-            onClick={() => {
-              replaceSelectedText("New Text from AI");
-              setSaveStatus("Unsaved");
-            }}>
-            Replace Text
-          </button>
         </EditorContent>
       </EditorRoot>
     </div>
