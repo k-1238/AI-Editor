@@ -40,7 +40,11 @@ export type HistoryType = {
   user_question: string;
 };
 
-export default function Sidebar() {
+type SidebarProps = {
+  open?: boolean;
+};
+
+export default function Sidebar({ open }: SidebarProps) {
   const [isActive, setIsActive] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(false);
   const [cursor, setCursor] = useState<string | null>("");
@@ -133,7 +137,10 @@ export default function Sidebar() {
     [isLoading, setChatItemHis]
   );
   return (
-    <div className="h-screen w-1/5 flex flex-col border-r-2">
+    <div
+      className={`h-screen sm:min-w-[260px] ${
+        !open && "max-sm:!w-0 border-r-2"
+      }  overflow-x-hidden flex flex-col`}>
       <div className="flex flex-row items-center justify-between px-5 py-7">
         <Sparkles className="h-15 w-15" size={40} />
         <div className="flex-1 flex justify-start ml-2">
