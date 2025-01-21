@@ -12,7 +12,7 @@ const HistoryItem = () => {
   }, []);
   const { chatItemHis } = useChatStore();
   return (
-    <ScrollArea className="w-full">
+    <ScrollArea className="w-full pr-3">
       <div className="flex flex-col gap-y-4">
         {chatItemHis.length > 0 &&
           chatItemHis.map((item, index) => (

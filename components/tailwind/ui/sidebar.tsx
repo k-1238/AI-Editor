@@ -41,44 +41,46 @@ export type HistoryType = {
 };
 
 export default function Sidebar() {
-  const [isActive, setIsActive] = useState<Number>(0);
+  const [isActive, setIsActive] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(false);
   const [cursor, setCursor] = useState<string | null>(null);
   const observerRef = useRef<HTMLDivElement>(null);
   const [hasNext, setHasNext] = useState(false);
   const { chats, setChats, searchStream, setChatItemHis } = useChatStore();
+
   const handlePaginate = useCallback(async () => {
-    console.log("handlePaginate called");
-    if (isLoading) return;
+    if (isLoading && cursor === null) return; // Prevent fetching if loading or cursor is null
     setIsLoading(true);
+
     try {
       const res = await axios.get(
         "http://127.0.0.1:8000/api/get_first_chats/",
-        { params: { cursor } }
+        {
+          params: { cursor },
+        }
       );
+
       const next_cursor = res.data.next_cursor;
-      if (res.data.has_next === false) {
-        setHasNext(false);
-        return;
-      }
-      setChats(res.data.chats);
+      const has_next = res.data.has_next;
+
+      setChats(res.data.chats); // Append new chats
       setCursor(next_cursor);
-      setHasNext(res.data.has_next);
+      setHasNext(has_next);
     } catch (error) {
       console.error("Error fetching chats:", error);
     } finally {
       setIsLoading(false);
     }
-  }, [cursor, isLoading]);
+  }, [cursor, isLoading, setChats]);
 
   const handleObserver = useCallback(
     (entries: IntersectionObserverEntry[]) => {
       const target = entries[0];
-      if (target.isIntersecting && !isLoading && hasNext) {
+      if (target.isIntersecting && !isLoading && hasNext && cursor !== null) {
         handlePaginate();
       }
     },
-    [handlePaginate, isLoading, hasNext] // Dependencies adjusted here
+    [handlePaginate, isLoading, hasNext, cursor]
   );
 
   useEffect(() => {
@@ -88,23 +90,19 @@ export default function Sidebar() {
       threshold: 0.1,
     });
 
-    if (observerRef.current) {
-      observer.observe(observerRef.current);
-    }
+    const currentRef = observerRef.current;
+    if (currentRef) observer.observe(currentRef);
 
     return () => {
-      if (observerRef.current) {
-        observer.unobserve(observerRef.current);
-      }
+      if (currentRef) observer.unobserve(currentRef);
     };
-  }, [handleObserver]); // Only depend on handleObserver
+  }, [handleObserver]);
 
-  // Initial data load if cursor is null
   useEffect(() => {
-    if (!cursor || cursor === "") {
+    if (!cursor && !hasNext && !isLoading) {
       handlePaginate();
     }
-  }, [cursor]);
+  }, [cursor, hasNext, isLoading, handlePaginate]);
 
   const getFilteredChats = useMemo(() => {
     if (searchStream === "") {
@@ -120,22 +118,18 @@ export default function Sidebar() {
       if (isLoading) return;
       setIsLoading(true);
       try {
-        await axios
-          .get("http://127.0.0.1:8000/api/get_chats_by_session_id/", {
-            params: { session_id },
-          })
-          .then((response) => {
-            setChatItemHis(response.data.chats);
-          })
-          .catch((error) => {
-            console.error("Error fetching chats:", error);
-          })
-          .finally(() => {
-            setIsLoading(false);
-          });
-      } catch (error) {}
+        const res = await axios.get(
+          "http://127.0.0.1:8000/api/get_chats_by_session_id/",
+          { params: { session_id } }
+        );
+        setChatItemHis(res.data.chats);
+      } catch (error) {
+        console.error("Error fetching chats by session ID:", error);
+      } finally {
+        setIsLoading(false);
+      }
     },
-    []
+    [isLoading, setChatItemHis]
   );
 
   return (
@@ -151,7 +145,7 @@ export default function Sidebar() {
         </div>
       </div>
       <div className="w-full overflow-y-auto">
-        {getFilteredChats && getFilteredChats.length > 0 ? (
+        {getFilteredChats.length > 0 ? (
           getFilteredChats.map((chat: Chat, index: number) => (
             <Dialog key={index}>
               <DialogTrigger asChild>
@@ -167,14 +161,13 @@ export default function Sidebar() {
                     <div className="rounded-sm border  p-1">
                       <MessageCircle className="h-4 w-4" />
                     </div>
-                    <span>{chat.content && chat.content.slice(0, 20)} ...</span>
+                    <span>{chat.content && chat.content.slice(0, 20)}...</span>
                   </div>
                   {isActive === index && <Check className="h-4 w-4" />}
                 </Button>
               </DialogTrigger>
-
               <DialogContent className="flex max-w-3xl items-center flex-col h-[calc(70vh-24px)]">
-                <DialogTitle className="">This is a Chat History</DialogTitle>
+                <DialogTitle>This is a Chat History</DialogTitle>
                 <HistoryItem />
               </DialogContent>
             </Dialog>
@@ -193,7 +186,7 @@ export default function Sidebar() {
         )}
         <div ref={observerRef} />
       </div>
-      <div className="flex items-center justify-center border-t-2 border-b-2 px-5 py-7 mt-5">
+      <div className="flex items-center justify-center border-t-2 border-b-2 px-5 py-7">
         Upgrade Version
       </div>
     </div>
