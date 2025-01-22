@@ -1,21 +1,17 @@
 import { EditorBubble, useEditor } from "novel";
 import { removeAIHighlight } from "novel/extensions";
-import {} from "novel/plugins";
 import { Fragment, type ReactNode, useEffect } from "react";
 import { Button } from "../ui/button";
 import Magic from "../ui/icons/magic";
 import { AISelector } from "./ai-selector";
-import { ChartData } from "../advanced-editor";
 
 interface GenerativeMenuSwitchProps {
-  children: ReactNode;
+  children?: ReactNode;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  setChartData: (chartData: ChartData) => void;
 }
 const GenerativeMenuSwitch = ({
   children,
-  setChartData,
   open,
   onOpenChange,
 }: GenerativeMenuSwitchProps) => {
@@ -34,13 +30,7 @@ const GenerativeMenuSwitch = ({
         },
       }}
       className="flex w-fit max-w-[90vw] overflow-hidden rounded-md border border-muted bg-background shadow-xl">
-      {open && (
-        <AISelector
-          open={open}
-          onOpenChange={onOpenChange}
-          setChartData={setChartData}
-        />
-      )}
+      {open && <AISelector open={open} onOpenChange={onOpenChange} />}
       {!open && (
         <Fragment>
           <Button

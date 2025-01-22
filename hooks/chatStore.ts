@@ -20,6 +20,17 @@ export type HistoryType = {
   user_question: string;
 };
 
+export interface ChartData {
+  labels: string[];
+  datasets: {
+    label: string;
+    data: number[];
+    backgroundColor: string[];
+    borderColor: string[];
+    borderWidth: number;
+  }[];
+}
+
 // Define a Zod schema for authentication data
 const chatSchema = z.object({
   searchStream: z.string(),
@@ -55,6 +66,8 @@ interface chatStore {
   setSearchStream: (value: string) => void;
   addChat: (item: Chat) => void;
   addChatHis: (item: HistoryType) => void;
+  chartData: ChartData;
+  setChartData: (chartData: ChartData) => void;
 }
 
 const useChatStore = create<chatStore>((set) => ({
@@ -91,6 +104,19 @@ const useChatStore = create<chatStore>((set) => ({
         chatItemHis: [...state.chatItemHis, newItem],
       };
     }),
+  chartData: {
+    labels: [],
+    datasets: [
+      {
+        label: "",
+        data: [],
+        backgroundColor: [],
+        borderColor: [],
+        borderWidth: 1,
+      },
+    ],
+  },
+  setChartData: (chartData: ChartData) => set(() => ({ chartData })),
 }));
 
 export default useChatStore;

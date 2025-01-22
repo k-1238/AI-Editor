@@ -10,28 +10,15 @@ import { ImageResizer, handleCommandNavigation } from "novel/extensions";
 import { useEffect, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import { defaultExtensions } from "./extensions";
-import { Separator } from "./ui/separator";
 
 import { handleImageDrop, handleImagePaste } from "novel/plugins";
 import GenerativeMenuSwitch from "./generative/generative-menu-switch";
 import { uploadFn } from "./image-upload";
-import { slashCommand } from "./slash-command";
-import { ChartNode } from "./ui/chart-node";
+import { ChartExtension } from "./ui/ChartExtension";
 
 const hljs = require("highlight.js");
 
-const extensions = [...defaultExtensions, slashCommand, ChartNode];
-
-export interface ChartData {
-  labels: string[];
-  datasets: {
-    label: string;
-    data: number[];
-    backgroundColor: string[];
-    borderColor: string[];
-    borderWidth: number;
-  }[];
-}
+const extensions = [...defaultExtensions, ChartExtension];
 
 const TailwindAdvancedEditor = () => {
   const [initialContent, setInitialContent] = useState<null | JSONContent>(
@@ -39,20 +26,8 @@ const TailwindAdvancedEditor = () => {
   );
   const [saveStatus, setSaveStatus] = useState("Saved");
   const [charsCount, setCharsCount] = useState();
-
   const [openAI, setOpenAI] = useState(false);
-  const [chartData, setChartData] = useState<ChartData>({
-    labels: [],
-    datasets: [
-      {
-        label: "",
-        data: [],
-        backgroundColor: [],
-        borderColor: [],
-        borderWidth: 1,
-      },
-    ],
-  });
+
   //Apply Codeblock Highlighting on the HTML from editor.getHTML()
   const highlightCodeblocks = (content: string) => {
     const doc = new DOMParser().parseFromString(content, "text/html");
@@ -67,6 +42,7 @@ const TailwindAdvancedEditor = () => {
   const debouncedUpdates = useDebouncedCallback(
     async (editor: EditorInstance) => {
       const json = editor.getJSON();
+      // Extract chart data from the editor content
       setCharsCount(editor.storage.characterCount.words());
       window.localStorage.setItem(
         "html-content",
@@ -87,6 +63,7 @@ const TailwindAdvancedEditor = () => {
     if (content) setInitialContent(JSON.parse(content));
     else setInitialContent(defaultEditorContent);
   }, []);
+  if (!initialContent) return null;
 
   return (
     <div className="relative w-full max-w-screen-lg">
@@ -121,20 +98,15 @@ const TailwindAdvancedEditor = () => {
                 "prose max-h-[57vh] overflow-auto prose-lg dark:prose-invert prose-headings:font-title font-default focus:outline-none max-w-full",
             },
           }}
+          onCreate={(editor) => {}}
           onUpdate={({ editor }) => {
             debouncedUpdates(editor);
             setSaveStatus("Unsaved");
           }}
           slotAfter={<ImageResizer />}>
-          {/* Generative Chart */}
-          {/* <GenerateChart chartData={chartData} /> */}
-          {/* Generative Menu for open AI model */}
           <GenerativeMenuSwitch
             open={openAI}
-            onOpenChange={setOpenAI}
-            setChartData={setChartData}>
-            <Separator orientation="vertical" />
-          </GenerativeMenuSwitch>
+            onOpenChange={setOpenAI}></GenerativeMenuSwitch>
         </EditorContent>
       </EditorRoot>
     </div>

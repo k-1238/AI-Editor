@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { NodeViewWrapper } from "@tiptap/react";
 import {
   Chart as ChartJS,
   BarElement,
@@ -14,7 +14,6 @@ import {
 import zoomPlugin from "chartjs-plugin-zoom";
 import { Bar, Line, Pie } from "react-chartjs-2";
 import { Mode } from "chartjs-plugin-zoom/types/options";
-import { ChartData } from "../advanced-editor";
 ChartJS.register(
   BarElement,
   CategoryScale,
@@ -28,11 +27,8 @@ ChartJS.register(
   zoomPlugin
 );
 
-interface GenerateChartProps {
-  chartData: ChartData;
-}
-
-const GenerateChart = ({ chartData }: GenerateChartProps) => {
+const GenerateChart = ({ node }: any) => {
+  const chartData = node.attrs.data;
   const aggregateData = (data: number[], interval: number) => {
     return data.reduce((acc, value, index) => {
       if (index % interval === 0) {
@@ -92,11 +88,11 @@ const GenerateChart = ({ chartData }: GenerateChartProps) => {
     },
   };
   return (
-    <div className="flex items-center gap-2">
-      {chartData.labels.length > 0 && (
+    <NodeViewWrapper>
+      <div className="flex items-center gap-2">
         <Bar data={chartData} options={options} />
-      )}
-    </div>
+      </div>
+    </NodeViewWrapper>
   );
 };
 

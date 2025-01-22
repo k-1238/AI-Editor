@@ -16,24 +16,22 @@ import { ScrollArea } from "../ui/scroll-area";
 import AICompletionCommands from "./ai-completion-command";
 import AISelectorCommands from "./ai-selector-commands";
 import { useSessionUUID } from "@/app/providers";
-import { ChartData } from "../advanced-editor";
 import { v4 as uuidv4 } from "uuid";
 import useChatStore from "@/hooks/chatStore";
 import axios from "axios";
 interface AISelectorProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  setChartData: (chartData: ChartData) => void;
 }
 
-export function AISelector({ onOpenChange, setChartData }: AISelectorProps) {
+export function AISelector({ onOpenChange }: AISelectorProps) {
   const { editor } = useEditor();
   const [inputValue, setInputValue] = useState("");
   const sessionUUID = useSessionUUID();
   const [streamedOutput, setStreamedOutput] = useState("");
   const [selectedValue, setSelectedValue] = useState<any>(null);
   const [selectedOption, setSelectedOption] = useState<any>(null);
-  const { addChat, addChatHis } = useChatStore();
+  const { addChat, addChatHis, setChartData } = useChatStore();
   const [chartType, setChartType] = useState("");
   const [collectedMsg, setCollectedMsg] = useState<string | null>(null);
   const handleSaveChat = useCallback(
@@ -107,6 +105,7 @@ export function AISelector({ onOpenChange, setChartData }: AISelectorProps) {
         output += chunk;
         if (chartType !== "chart") setStreamedOutput((prev) => prev + chunk);
       }
+
       setCollectedMsg(output);
 
       if (chartType === "chart") {
@@ -116,8 +115,13 @@ export function AISelector({ onOpenChange, setChartData }: AISelectorProps) {
             .replace(/javascript/g, "")
             .replace(/([a-zA-Z0-9_]+):/g, '"$1":')
             .replace(/'([^']+)'/g, '"$1"');
-
           const parsedData = JSON.parse(sanitizedOutput);
+          editor?.commands.insertContent({
+            type: "chart",
+            attrs: {
+              data: parsedData,
+            },
+          });
           setChartData(parsedData);
         } catch (error) {
           console.error("Failed to parse streamed JavaScript response:", error);
@@ -200,7 +204,7 @@ export function AISelector({ onOpenChange, setChartData }: AISelectorProps) {
 
                 const slice = editor.state.selection.content();
                 const text = editor.storage.markdown.serializer.serialize(
-                  slice.content
+                  slice?.content
                 );
                 setSelectedValue(inputValue);
                 setSelectedOption("zap");
