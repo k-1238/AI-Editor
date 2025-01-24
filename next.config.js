@@ -1,5 +1,16 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      config.externals = config.externals || [];
+      config.externals.push("hammerjs");
+      config.externals.push("chartjs-plugin-zoom");
+    }
+    return config;
+  },
+  experimental: {
+    turbopack: false,
+  },
   reactStrictMode: false,
   redirects: async () => {
     return [

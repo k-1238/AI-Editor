@@ -27,11 +27,10 @@ const AICompletionCommands = ({
                   from: selection.from,
                   to: selection.to,
                 },
-                completion,
+                completion
               )
               .run();
-          }}
-        >
+          }}>
           <Check className="h-4 w-4 text-muted-foreground" />
           Replace selection
         </CommandItem>
@@ -45,8 +44,7 @@ const AICompletionCommands = ({
               .focus()
               .insertContentAt(selection.to + 1, completion)
               .run();
-          }}
-        >
+          }}>
           <TextQuote className="h-4 w-4 text-muted-foreground" />
           Insert below
         </CommandItem>

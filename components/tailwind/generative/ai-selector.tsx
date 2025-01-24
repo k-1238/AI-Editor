@@ -1,7 +1,4 @@
-"use client";
-
 import { Command, CommandInput } from "@/components/tailwind/ui/command";
-
 import { useCompletion } from "ai/react";
 import { ArrowUp } from "lucide-react";
 import { useEditor } from "novel";
@@ -19,6 +16,7 @@ import { useSessionUUID } from "@/app/providers";
 import { v4 as uuidv4 } from "uuid";
 import useChatStore from "@/hooks/chatStore";
 import axios from "axios";
+import { getSession } from "next-auth/react";
 interface AISelectorProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -36,14 +34,16 @@ export function AISelector({ onOpenChange }: AISelectorProps) {
   const [collectedMsg, setCollectedMsg] = useState<string | null>(null);
   const handleSaveChat = useCallback(
     async (data: any) => {
+      const session = await getSession();
       try {
         await axios
-          .post("http://127.0.0.1:8000/api/save_chat", {
+          .post(`${process.env.NEXT_PUBLIC_API_URL}/api/save_chat`, {
             option: data.option,
             command: data.command,
             session_id: data.session_id,
             collectedMsg: data.collectedMsg,
             prompt: data.command,
+            user_id: session?.user?.pk,
           })
           .then((res) => {
             addChat(res.data.user);
@@ -77,14 +77,18 @@ export function AISelector({ onOpenChange }: AISelectorProps) {
 
   const { completion, complete, isLoading } = useCompletion({
     id: uuidv4(),
-    api: "http://127.0.0.1:8000/api/create_chat_stream",
+    api: `${process.env.NEXT_PUBLIC_API_URL}/api/create_chat_stream`,
     onResponse: async (response) => {
       setStreamedOutput("");
       if (response.status === 429) {
         toast.error("You have reached your request limit for the day.");
         return;
       }
-      if (response.body.locked) {
+      if (response.status === 500) {
+        toast.error("Something went wrong. Please try again.");
+        return;
+      }
+      if (response.body?.locked) {
         toast.error("Stream is already locked!");
       }
       const reader = response.body?.getReader();
@@ -133,9 +137,9 @@ export function AISelector({ onOpenChange }: AISelectorProps) {
     onFinish: () => {
       complete("");
     },
-    // onError: (e) => {
-    //   toast.error(e.message);
-    // },
+    onError: (e) => {
+      toast.error(e.message);
+    },
   });
 
   useEffect(() => {

@@ -1,4 +1,3 @@
-"use client";
 import { defaultEditorContent } from "@/lib/content";
 import {
   EditorContent,

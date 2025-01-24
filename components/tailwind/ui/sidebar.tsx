@@ -1,4 +1,3 @@
-"use client";
 import React, {
   useCallback,
   useEffect,
@@ -20,6 +19,7 @@ import axios from "axios";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "./dialog";
 import HistoryItem from "./historyItem";
 import useChatStore from "@/hooks/chatStore";
+import { getSession } from "next-auth/react";
 
 type Chat = {
   created_at: string;
@@ -56,22 +56,28 @@ export default function Sidebar({ open }: SidebarProps) {
     if (isLoading) return; // Prevent fetching if loading or cursor is null
     setIsLoading(true);
     try {
+      const session = await getSession();
       const res = await axios.get(
-        "http://127.0.0.1:8000/api/get_first_chats/",
+        `${process.env.NEXT_PUBLIC_API_URL}/api/get_first_chats/`,
         {
-          params: { cursor },
+          params: { cursor, user_id: session?.user?.pk },
         }
       );
-      const { next_cursor, has_next } = res.data;
+      const { next_cursor, has_next, chats } = res.data;
 
-      setChats(res.data.chats); // Append new chats
-      if (next_cursor === null) {
+      // Append new chats
+      if (chats.length === 0 && !next_cursor) {
         setHasNext(false);
-        return;
+        setIsLoading(false);
+        setCursor(next_cursor);
+      } else {
+        setChats(res.data.chats);
+        setCursor(next_cursor);
+        setHasNext(has_next);
       }
-      setCursor(next_cursor);
-      setHasNext(has_next);
     } catch (error) {
+      setHasNext(false);
+      setIsLoading(false);
       console.error("Error fetching chats:", error);
     } finally {
       setIsLoading(false);
@@ -85,7 +91,7 @@ export default function Sidebar({ open }: SidebarProps) {
         handlePaginate();
       }
     },
-    [handlePaginate, isLoading, hasNext]
+    [handlePaginate, cursor, isLoading, hasNext]
   );
 
   useEffect(() => {
@@ -104,7 +110,7 @@ export default function Sidebar({ open }: SidebarProps) {
   }, [handleObserver, isLoading]);
 
   useEffect(() => {
-    if (!cursor || cursor === "") {
+    if (cursor !== null && cursor === "") {
       handlePaginate();
     }
   }, [cursor, handlePaginate]);
@@ -124,7 +130,7 @@ export default function Sidebar({ open }: SidebarProps) {
       setIsLoading(true);
       try {
         const res = await axios.get(
-          "http://127.0.0.1:8000/api/get_chats_by_session_id/",
+          `${process.env.NEXT_PUBLIC_API_URL}/api/get_chats_by_session_id/`,
           { params: { session_id } }
         );
         setChatItemHis(res.data.chats);
@@ -138,12 +144,12 @@ export default function Sidebar({ open }: SidebarProps) {
   );
   return (
     <div
-      className={`h-screen sm:min-w-[260px] ${
+      className={`h-screen sm:min-w-[289px] ${
         !open && "max-sm:!w-0 border-r-2"
       }  overflow-x-hidden flex flex-col`}>
       <div className="flex flex-row items-center justify-between px-5 py-7">
         <Sparkles className="h-15 w-15" size={40} />
-        <div className="flex-1 flex justify-start ml-2">
+        <div className="flex justify-start ml-2">
           <Search />
         </div>
         <div className="flex flex-row space-x-2">
@@ -151,21 +157,22 @@ export default function Sidebar({ open }: SidebarProps) {
           <FlipVerticalIcon size={20} />
         </div>
       </div>
-      <div className="w-full overflow-y-auto space-y-2">
-        {getFilteredChats.length > 0 ? (
+      <div className="w-full overflow-y-auto space-y-2 h-screen">
+        {getFilteredChats.length > 0 &&
           getFilteredChats.map((chat: Chat, index: number) => (
             <Dialog key={index}>
+              {" "}
+              {/* Use session_id or unique chat ID */}
               <DialogTrigger asChild>
                 <Button
-                  key={index}
                   className="flex w-full items-center justify-between rounded px-2 py-1.5 text-sm"
                   variant={isActive === index ? "secondary" : "ghost"}
-                  onClick={async () => {
-                    await handleFetchChatsBySessionID(chat.session_id);
+                  onClick={() => {
                     setIsActive(index);
+                    handleFetchChatsBySessionID(chat.session_id);
                   }}>
                   <div className="flex items-center space-x-2">
-                    <div className="rounded-sm border  p-1">
+                    <div className="rounded-sm border p-1">
                       <MessageCircle className="h-4 w-4" />
                     </div>
                     <span>{chat.content && chat.content.slice(0, 20)}...</span>
@@ -178,20 +185,22 @@ export default function Sidebar({ open }: SidebarProps) {
                 <HistoryItem />
               </DialogContent>
             </Dialog>
-          ))
-        ) : isLoading ? (
-          <div className="w-full h-full flex justify-center items-center">
+          ))}
+
+        {isLoading && (
+          <div className="w-full flex justify-center items-center">
             <LucideLoader
               size={30}
               className="animate-spin text-black dark:text-cyan-500"
             />
           </div>
-        ) : (
-          <div className="w-full h-full flex justify-center items-center">
+        )}
+        {!hasNext && (
+          <div className="w-full flex justify-center items-center">
             <p className="text-gray-500">No chats available</p>
           </div>
         )}
-        <div ref={observerRef} className="h-[10px]" />
+        {hasNext && <div ref={observerRef} />}
       </div>
       <div className="flex items-center justify-center border-t-2 border-b-2 px-5 py-7">
         Upgrade Version

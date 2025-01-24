@@ -3,14 +3,12 @@
 import { z } from "zod";
 
 import { signIn } from "./auth";
-import Cookies from "js-cookie";
 import axios from "axios";
 const authFormSchema = z.object({
   username: z.string().optional(),
   email: z.string().email(),
   password: z.string().min(6),
 });
-const csrfToken = Cookies.get("csrftoken");
 
 export interface LoginActionState {
   status: "idle" | "in_progress" | "success" | "failed" | "invalid_data";
@@ -29,7 +27,7 @@ export const login = async (
     await signIn("credentials", {
       email: validatedData.email,
       password: validatedData.password,
-      redirectTo: "/chat",
+      redirect: false,
     });
 
     return { status: "success" };
@@ -62,12 +60,15 @@ export const register = async (
       email: formData.get("email"),
       password: formData.get("password"),
     });
-    const response = await axios.post("http://127.0.0.1:8000/api/register/", {
-      username: validatedData.username,
-      email: validatedData.email,
-      password: validatedData.password,
-      password2: validatedData.password,
-    });
+    const response = await axios.post(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/registration/`,
+      {
+        username: validatedData.username,
+        email: validatedData.email,
+        password1: validatedData.password,
+        password2: validatedData.password,
+      }
+    );
     if (response.status === 201) {
       return { status: "success" };
     } else if (response.status === 400 && response.data.non_field_errors) {

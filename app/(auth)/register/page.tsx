@@ -13,6 +13,12 @@ import useActionState from "../useAction";
 import { Label } from "@/components/tailwind/ui/label";
 import { Input } from "@/components/tailwind/ui/input";
 
+import dynamic from "next/dynamic";
+
+const SocialButton = dynamic(() => import("@/components/tailwind/ui/oAuth"), {
+  ssr: false,
+});
+
 export default function Page() {
   const router = useRouter();
 
@@ -28,16 +34,12 @@ export default function Page() {
 
   useEffect(() => {
     if (state.status === "user_exists") {
-      alert("Account already exists");
       toast.error("Account already exists");
     } else if (state.status === "failed") {
-      alert("Failed to create account");
       toast.error("Failed to create account");
     } else if (state.status === "invalid_data") {
-      alert("Failed validating your submission!");
       toast.error("Failed validating your submission!");
     } else if (state.status === "success") {
-      alert("Account created successfully");
       toast.success("Account created successfully");
       setIsSuccessful(true);
       router.push("/login");
@@ -78,6 +80,7 @@ export default function Page() {
             />
           </div>
           <SubmitButton isSuccessful={isSuccessful}>Sign Up</SubmitButton>
+          <SocialButton />
           <p className="text-center text-sm text-gray-600 mt-4 dark:text-zinc-400">
             {"Already have an account? "}
             <Link

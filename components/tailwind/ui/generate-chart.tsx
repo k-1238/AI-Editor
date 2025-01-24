@@ -90,7 +90,9 @@ const GenerateChart = ({ node }: any) => {
   return (
     <NodeViewWrapper>
       <div className="flex items-center gap-2">
-        <Bar data={chartData} options={options} />
+        {chartData.labels.length > 0 && (
+          <Bar data={chartData} options={options} />
+        )}
       </div>
     </NodeViewWrapper>
   );

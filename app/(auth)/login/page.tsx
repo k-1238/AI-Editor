@@ -10,6 +10,7 @@ import { SubmitButton } from "@/components/submit-button";
 
 import { login, type LoginActionState } from "../actions";
 import useActionState from "../useAction";
+import SocialButton from "@/components/tailwind/ui/oAuth";
 
 export default function Page() {
   const router = useRouter();
@@ -31,7 +32,7 @@ export default function Page() {
       toast.error("Failed validating your submission!");
     } else if (state.status === "success") {
       setIsSuccessful(true);
-      router.refresh();
+      router.push("/chat");
     }
   }, [state.status, router]);
 
@@ -51,6 +52,8 @@ export default function Page() {
         </div>
         <AuthForm action={handleSubmit} defaultEmail={email}>
           <SubmitButton isSuccessful={isSuccessful}>Sign in</SubmitButton>
+
+          <SocialButton />
           <p className="text-center text-sm text-gray-600 mt-4 dark:text-zinc-400">
             {"Don't have an account? "}
             <Link
