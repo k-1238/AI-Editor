@@ -60,6 +60,13 @@ export const register = async (
       email: formData.get("email"),
       password: formData.get("password"),
     });
+    const res_check_email = await axios.post(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/account/check-email/`,
+      {
+        email: validatedData.email,
+      }
+    );
+    if (res_check_email.data.email_exists) return { status: "user_exists" };
     const response = await axios.post(
       `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/registration/`,
       {
@@ -71,16 +78,12 @@ export const register = async (
     );
     if (response.status === 201) {
       return { status: "success" };
-    } else if (response.status === 400 && response.data.non_field_errors) {
-      return { status: "user_exists" };
     }
-
     return { status: "failed" };
   } catch (error) {
     if (error instanceof z.ZodError) {
       return { status: "invalid_data" };
     }
-
     return { status: "failed" };
   }
 };

@@ -1,10 +1,25 @@
 import { signIn } from "next-auth/react";
+import Router from "next/router";
+import { toast } from "sonner";
 
 const SocialButton = () => {
   const goToGoogleAuth = async () => {
-    await signIn("google", {
-      redirectTo: "/chat",
+    const res = await signIn("google", {
+      redirect: false,
     });
+    if (res?.error) {
+      toast.error(res.error);
+    }
+    if (res?.ok) Router.push("/chat");
+  };
+  const goToGithubAuth = async () => {
+    const res = await signIn("github", {
+      redirect: false,
+    });
+    if (res?.error) {
+      toast.error(res.error);
+    }
+    if (res?.ok) Router.push("/chat");
   };
   return (
     <div className="px-6 sm:px-0 max-w-sm space-y-3">
@@ -29,7 +44,7 @@ const SocialButton = () => {
         Sign in with Google<div></div>
       </button>
       <button
-        onClick={() => signIn("github")}
+        onClick={goToGithubAuth}
         type="button"
         className="py-2 px-4 max-w-md flex justify-center items-center bg-gray-600 hover:bg-gray-700 focus:ring-gray-500 focus:ring-offset-gray-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 rounded-lg">
         <svg

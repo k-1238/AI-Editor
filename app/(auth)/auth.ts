@@ -27,58 +27,8 @@ interface BackendResponse {
 }
 
 const BACKEND_ACCESS_TOKEN_LIFETIME = 45 * 60; // 45 minutes
-const BACKEND_REFRESH_TOKEN_LIFETIME = 6 * 24 * 60 * 60; // 6 days
 
 const getCurrentEpochTime = () => Math.floor(Date.now() / 1000);
-const SIGN_IN_HANDLERS: { [key: string]: (account: any) => Promise<boolean> } =
-  {
-    credentials: async (account: any): Promise<boolean> => {
-      try {
-        const response = await axios.post(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/login/`,
-          {
-            email: account.email,
-            password: account.password,
-          },
-          {
-            withCredentials: true,
-          }
-        );
-        account.meta = response.data;
-        return true;
-      } catch (error) {
-        console.error("Error in credentials sign-in handler:", error);
-        return false;
-      }
-    },
-    google: async (account: any): Promise<boolean> => {
-      try {
-        const response = await axios.post(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/socials/google/`,
-          { access_token: account.id_token }
-        );
-        account.meta = response.data;
-        return true;
-      } catch (error) {
-        console.error("Error in Google sign-in handler:", error);
-        return false;
-      }
-    },
-    github: async (account: any): Promise<boolean> => {
-      try {
-        const response = await axios.post(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/socials/github/`,
-          { access_token: account.access_token }
-        );
-        account.meta = response.data;
-        return true;
-      } catch (error) {
-        console.error("Error in GitHub sign-in handler:", error);
-        return false;
-      }
-    },
-  };
-
 export const {
   handlers: { GET, POST },
   auth,
@@ -93,6 +43,7 @@ export const {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
+        console.log("credentials: ", credentials);
         try {
           if (!credentials?.email || !credentials?.password) {
             return null; // or handle validation error
@@ -146,23 +97,62 @@ export const {
   pages: {
     signIn: "/login",
     signOut: "/signout",
-    error: "auth/error",
+    error: "/login",
   },
   secret: process.env.NEXTAUTH_SECRET,
   callbacks: {
-    // async signIn({ account }: any) {
-    //   if (account?.provider && SIGN_IN_HANDLERS[account.provider]) {
-    //     return SIGN_IN_HANDLERS[account.provider](account);
-    //   }
-    //   return false;
-    // },
-    async jwt({ token, user, account }: any) {
-      if (user && account) {
-        token.user = user;
-        token.accessToken = (user as ExtendedUser).accessToken;
-        token.refreshToken = (user as ExtendedUser).refreshToken;
+    async jwt({ token, user, account, session }: any) {
+      if (account && account.provider === "google") {
+        console.log("account: ", account);
+        token.accessToken = (account as any).accessToken;
+        token.refreshToken = (account as any).refreshToken;
         token.ref = getCurrentEpochTime() + BACKEND_ACCESS_TOKEN_LIFETIME;
-        return token;
+
+        try {
+          const response = await axios.post(
+            `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/socials/google/`,
+            {
+              access_token: account.access_token,
+            }
+          );
+          account.meta = response.data;
+          return token;
+        } catch (error: any) {
+          if (error.response && error.response.status === 400) {
+            const errorData = error.response.data;
+
+            if (errorData.non_field_errors) {
+              toast.error(errorData.non_field_errors);
+            }
+            return false;
+          } else {
+            console.log("Error in Google sign-in handler:", error);
+          }
+        }
+      }
+      if (account && account.provider === "github") {
+        token.accessToken = (account as ExtendedUser).accessToken;
+        token.refreshToken = (account as ExtendedUser).refreshToken;
+        token.ref = getCurrentEpochTime() + BACKEND_ACCESS_TOKEN_LIFETIME;
+        try {
+          const response = await axios.post(
+            `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/socials/github/`,
+            { access_token: account.access_token }
+          );
+          account.meta = response.data;
+          return token;
+        } catch (error: any) {
+          if (error.response && error.response.status === 400) {
+            const errorData = error.response.data;
+
+            if (errorData.non_field_errors) {
+              toast.error(errorData.non_field_errors); // user already exists
+            }
+            return false;
+          } else {
+            console.log("Error in Google sign-in handler:", error);
+          }
+        }
       }
 
       if (token.ref && getCurrentEpochTime() > token.ref) {
@@ -182,7 +172,7 @@ export const {
       }
       return token;
     },
-    async session({ session, token, user }: any) {
+    async session({ session, token, account, user }: any) {
       const extendedSession: ExtendedSession = {
         ...session,
         user: token.user as User,
