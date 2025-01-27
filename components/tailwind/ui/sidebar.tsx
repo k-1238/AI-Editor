@@ -5,23 +5,16 @@ import React, {
   useRef,
   useState,
 } from "react";
-import {
-  MessageCircle,
-  Sparkles,
-  Check,
-  Plus,
-  FlipVerticalIcon,
-  LucideLoader,
-} from "lucide-react";
+import { Sparkles, Plus, FlipVerticalIcon, LucideLoader } from "lucide-react";
 import Search from "./animate-search/search";
-import { Button } from "./button";
 import axios from "axios";
-import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "./dialog";
-import HistoryItem from "./historyItem";
 import useChatStore from "@/hooks/chatStore";
 import { getSession } from "next-auth/react";
+import { Tooltip } from "./tooltip";
+import { useRouter } from "next/navigation";
+import ChatItemModel from "../generative/chat-item-model";
 
-type Chat = {
+export type Chat = {
   created_at: string;
   session_id: string;
   content: string;
@@ -45,13 +38,13 @@ type SidebarProps = {
 };
 
 export default function Sidebar({ open }: SidebarProps) {
-  const [isActive, setIsActive] = useState<number>(0);
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [cursor, setCursor] = useState<string | null>("");
   const observerRef = useRef<HTMLDivElement>(null);
   const [hasNext, setHasNext] = useState(false);
-  const { chats, setChats, searchStream, setChatItemHis } = useChatStore();
-
+  const { chats, setChats, searchStream } = useChatStore();
+  const [isActive, setIsActive] = useState<string>("");
   const handlePaginate = useCallback(async () => {
     if (isLoading) return; // Prevent fetching if loading or cursor is null
     setIsLoading(true);
@@ -124,24 +117,6 @@ export default function Sidebar({ open }: SidebarProps) {
     );
   }, [chats, searchStream]);
 
-  const handleFetchChatsBySessionID = useCallback(
-    async (session_id: string) => {
-      if (isLoading) return;
-      setIsLoading(true);
-      try {
-        const res = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/get_chats_by_session_id/`,
-          { params: { session_id } }
-        );
-        setChatItemHis(res.data.chats);
-      } catch (error) {
-        console.error("Error fetching chats by session ID:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [isLoading, setChatItemHis]
-  );
   return (
     <div
       className={`h-screen sm:min-w-[289px] ${
@@ -152,39 +127,28 @@ export default function Sidebar({ open }: SidebarProps) {
         <div className="flex justify-start ml-2">
           <Search />
         </div>
-        <div className="flex flex-row space-x-2">
-          <Plus size={20} />
-          <FlipVerticalIcon size={20} />
-        </div>
+        {/* <div className="flex flex-row space-x-2">
+          <Tooltip content="New Chart" className="text-sm">
+            <Plus
+              size={20}
+              className="cursor-pointer"
+              onClick={() => {
+                router.push("/chat");
+              }}
+            />
+          </Tooltip>
+          <FlipVerticalIcon size={20} className="cursor-pointer" />
+        </div> */}
       </div>
       <div className="w-full overflow-y-auto space-y-2 h-screen">
         {getFilteredChats.length > 0 &&
           getFilteredChats.map((chat: Chat, index: number) => (
-            <Dialog key={index}>
-              {" "}
-              {/* Use session_id or unique chat ID */}
-              <DialogTrigger asChild>
-                <Button
-                  className="flex w-full items-center justify-between rounded px-2 py-1.5 text-sm"
-                  variant={isActive === index ? "secondary" : "ghost"}
-                  onClick={() => {
-                    setIsActive(index);
-                    handleFetchChatsBySessionID(chat.session_id);
-                  }}>
-                  <div className="flex items-center space-x-2">
-                    <div className="rounded-sm border p-1">
-                      <MessageCircle className="h-4 w-4" />
-                    </div>
-                    <span>{chat.content && chat.content.slice(0, 20)}...</span>
-                  </div>
-                  {isActive === index && <Check className="h-4 w-4" />}
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="flex max-w-3xl items-center flex-col h-[calc(70vh-24px)]">
-                <DialogTitle>This is a Chat History</DialogTitle>
-                <HistoryItem />
-              </DialogContent>
-            </Dialog>
+            <ChatItemModel
+              key={index}
+              chat={chat}
+              setIsActive={setIsActive}
+              isActive={isActive}
+            />
           ))}
 
         {isLoading && (
