@@ -107,11 +107,22 @@ export function AISelector({ onOpenChange }: AISelectorProps) {
 
         const chunk = decoder.decode(value);
         output += chunk;
-        if (chartType !== "chart") setStreamedOutput((prev) => prev + chunk);
+        if (chartType !== "chart" && chartType !== "") {
+          // setStreamedOutput((prev) => prev + chunk);
+          if (editor) {
+            if (editor) {
+              const { from, to } = editor.state.selection;
+              editor.commands.setTextSelection({ from, to });
+              editor.commands.insertContent(chunk.toString());
+            }
+          }
+        }
       }
 
       setCollectedMsg(output);
-
+      if (chartType === "") {
+        return;
+      }
       if (chartType === "chart") {
         try {
           const sanitizedOutput = output
@@ -138,7 +149,7 @@ export function AISelector({ onOpenChange }: AISelectorProps) {
       complete("");
     },
     onError: (e) => {
-      toast.error(e.message);
+      // toast.error(e.message);
     },
   });
 
@@ -206,8 +217,8 @@ export function AISelector({ onOpenChange }: AISelectorProps) {
                     setInputValue("");
                   });
 
-                const slice = editor.state.selection.content();
-                const text = editor.storage.markdown.serializer.serialize(
+                const slice = editor?.state.selection.content();
+                const text = editor?.storage.markdown.serializer.serialize(
                   slice?.content
                 );
                 setSelectedValue(inputValue);
@@ -228,7 +239,7 @@ export function AISelector({ onOpenChange }: AISelectorProps) {
           {hasCompletion ? (
             <AICompletionCommands
               onDiscard={() => {
-                editor.chain().unsetHighlight().focus().run();
+                editor?.chain().unsetHighlight().focus().run();
                 onOpenChange(false);
               }}
               completion={completion}
@@ -253,14 +264,14 @@ export function AISelector({ onOpenChange }: AISelectorProps) {
         </>
       )}
       {/* Displaying the streamed output progressively */}
-      {streamedOutput && (
+      {/* {streamedOutput && (
         <div className="mt-4 max-h-[30vh] overflow-auto px-2 py-1">
           <h3 className="font-bold justify-self-center">AI Response:</h3>
           <div className="prose p-2 px-4 prose-sm">
             <Markdown>{streamedOutput}</Markdown>
           </div>
         </div>
-      )}
+      )} */}
     </Command>
   );
 }
