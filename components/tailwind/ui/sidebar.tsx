@@ -13,6 +13,7 @@ import { getSession } from "next-auth/react";
 import { Tooltip } from "./tooltip";
 import { useRouter } from "next/navigation";
 import ChatItemModel from "../generative/chat-item-model";
+import { toast } from "sonner";
 
 export type Chat = {
   created_at: string;
@@ -71,7 +72,7 @@ export default function Sidebar({ open }: SidebarProps) {
     } catch (error) {
       setHasNext(false);
       setIsLoading(false);
-      console.error("Error fetching chats:", error);
+      toast.error("Error fetching chats");
     } finally {
       setIsLoading(false);
     }

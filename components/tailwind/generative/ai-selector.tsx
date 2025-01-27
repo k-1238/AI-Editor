@@ -50,7 +50,7 @@ export function AISelector({ onOpenChange }: AISelectorProps) {
             addChatHis(res.data.chatHis);
           });
       } catch (error) {
-        console.log("error: ", error);
+        toast.error("Something went wrong. Please try again.");
       }
     },
     [collectedMsg]
@@ -93,7 +93,7 @@ export function AISelector({ onOpenChange }: AISelectorProps) {
       }
       const reader = response.body?.getReader();
       if (!reader) {
-        console.error("No readable stream found.");
+        toast.error("No readable stream found.");
         return;
       }
 
@@ -139,7 +139,6 @@ export function AISelector({ onOpenChange }: AISelectorProps) {
           });
           setChartData(parsedData);
         } catch (error) {
-          console.error("Failed to parse streamed JavaScript response:", error);
           toast.error("Failed to process the streamed response.");
         }
       }

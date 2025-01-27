@@ -12,6 +12,7 @@ import { useCallback, useState } from "react";
 import { getSession } from "next-auth/react";
 import axios from "axios";
 import useChatStore from "@/hooks/chatStore";
+import { toast } from "sonner";
 type ChatItemModelProps = {
   chat: Chat;
   isActive: string;
@@ -32,7 +33,7 @@ const ChatItemModel = ({ chat, isActive, setIsActive }: ChatItemModelProps) => {
         );
         setChatItemHis(res.data.chats);
       } catch (error) {
-        console.error("Error fetching chats by session ID:", error);
+        toast.error("Error fetching chats by session ID");
       } finally {
         setIsFetching(false);
       }
