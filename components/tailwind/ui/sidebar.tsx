@@ -10,7 +10,6 @@ import Search from "./animate-search/search";
 import axios from "axios";
 import useChatStore from "@/hooks/chatStore";
 import { getSession } from "next-auth/react";
-import { Tooltip } from "./tooltip";
 import { useRouter } from "next/navigation";
 import ChatItemModel from "../generative/chat-item-model";
 import { toast } from "sonner";
