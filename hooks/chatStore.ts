@@ -79,8 +79,8 @@ const useChatStore = create<chatStore>((set) => ({
       chats: [...state.chats, ...newChats], // Combine the old and new arrays
     })),
   setChatItemHis: (itemHis: HistoryType[]) =>
-    set((state: { chatItemHis: HistoryType[] }) => ({
-      chatItemHis: [...state.chatItemHis, ...itemHis],
+    set((state) => ({
+      chatItemHis: itemHis,
     })),
 
   setSearchStream: (value) => set(() => ({ searchStream: value })),
