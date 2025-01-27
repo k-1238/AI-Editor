@@ -43,7 +43,6 @@ export const {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        console.log("credentials: ", credentials);
         try {
           if (!credentials?.email || !credentials?.password) {
             return null; // or handle validation error
@@ -70,6 +69,7 @@ export const {
 
           if (response.status === 400) {
             toast.error("Access Denied");
+            return null;
           }
         } catch (error) {
           console.error("Error during credentials authorization:", error);
@@ -102,8 +102,15 @@ export const {
   secret: process.env.NEXTAUTH_SECRET,
   callbacks: {
     async jwt({ token, user, account, session }: any) {
+      if (user) {
+        token.user = {
+          ...user, // Include all user data returned from authorize
+          accessToken: user.accessToken,
+          refreshToken: user.refreshToken,
+          ref: getCurrentEpochTime() + BACKEND_ACCESS_TOKEN_LIFETIME,
+        };
+      }
       if (account && account.provider === "google") {
-        console.log("account: ", account);
         token.accessToken = (account as any).accessToken;
         token.refreshToken = (account as any).refreshToken;
         token.ref = getCurrentEpochTime() + BACKEND_ACCESS_TOKEN_LIFETIME;
