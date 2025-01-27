@@ -8,6 +8,7 @@ import { useState } from "react";
 import { Sheet, SheetContent } from "@/components/tailwind/ui/sheet";
 import { logout } from "@/actions/logout";
 import { Button } from "@/components/tailwind/ui/button";
+import { Tooltip } from "@/components/tailwind/ui/tooltip";
 
 export default function Page() {
   const [open, setOpen] = useState(false);
@@ -26,12 +27,14 @@ export default function Page() {
             className="sm:hidden cursor-pointer"
             onClick={() => setOpen(!open)} // Toggle Sidebar visibility on click
           />
-          <Button
-            className="ml-auto"
-            variant={"ghost"}
-            onClick={() => logout()}>
-            <LogOut>LogOut</LogOut>
-          </Button>
+          <Tooltip content="Logout" className="text-sm">
+            <Button
+              className="ml-auto"
+              variant={"ghost"}
+              onClick={() => logout()}>
+              <LogOut>LogOut</LogOut>
+            </Button>
+          </Tooltip>
           <Menu />
         </div>
 
