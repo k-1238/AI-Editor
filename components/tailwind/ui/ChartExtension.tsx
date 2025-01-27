@@ -1,7 +1,10 @@
 // Filename: ChartNode.tsx
 import { Node, mergeAttributes } from "@tiptap/core";
 import { ReactNodeViewRenderer } from "@tiptap/react";
-import GenerateChart from "./generate-chart";
+import dynamic from "next/dynamic";
+const GenerateChart = dynamic(() => import("./generate-chart"), {
+  ssr: false,
+});
 
 export const ChartExtension = Node.create({
   name: "chart",
