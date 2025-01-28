@@ -43,7 +43,7 @@ export function AISelector({ onOpenChange }: AISelectorProps) {
             session_id: data.session_id,
             collectedMsg: data.collectedMsg,
             prompt: data.command,
-            user_id: session?.user?.pk,
+            user_id: (session?.user as { pk: number })?.pk,
           })
           .then((res) => {
             addChat(res.data.user);
@@ -198,7 +198,9 @@ export function AISelector({ onOpenChange }: AISelectorProps) {
                   ? "Tell AI what to do next"
                   : "Ask AI to edit or generate..."
               }
-              onFocus={() => addAIHighlight(editor)}
+              onFocus={() => {
+                if (editor) addAIHighlight(editor);
+              }}
             />
             {/* Zad */}
             <Button

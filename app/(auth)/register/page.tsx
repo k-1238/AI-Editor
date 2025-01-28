@@ -12,12 +12,7 @@ import { register, type RegisterActionState } from "../actions";
 import useActionState from "../useAction";
 import { Label } from "@/components/tailwind/ui/label";
 import { Input } from "@/components/tailwind/ui/input";
-
-import dynamic from "next/dynamic";
-
-const SocialButton = dynamic(() => import("@/components/tailwind/ui/oAuth"), {
-  ssr: false,
-});
+import SocialButton from "@/components/tailwind/ui/oAuth";
 
 export default function Page() {
   const router = useRouter();

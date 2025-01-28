@@ -53,7 +53,7 @@ export default function Sidebar({ open }: SidebarProps) {
       const res = await axios.get(
         `${process.env.NEXT_PUBLIC_API_URL}/api/get_first_chats/`,
         {
-          params: { cursor, user_id: session?.user?.pk },
+          params: { cursor, user_id: (session?.user as { pk: number })?.pk },
         }
       );
       const { next_cursor, has_next, chats } = res.data;
@@ -71,6 +71,7 @@ export default function Sidebar({ open }: SidebarProps) {
     } catch (error) {
       setHasNext(false);
       setIsLoading(false);
+      setCursor(null);
       toast.error("Error fetching chats");
     } finally {
       setIsLoading(false);

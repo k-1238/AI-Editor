@@ -63,9 +63,9 @@ const AISelectorCommands = ({
           <CommandItem
             onSelect={(value) => {
               setChartType(option.value);
-              const slice = editor.state.selection.content();
-              const text = editor.storage.markdown.serializer.serialize(
-                slice.content
+              const slice = editor?.state.selection.content();
+              const text = editor?.storage.markdown.serializer.serialize(
+                slice?.content
               );
               onSelect(text, value);
             }}
@@ -81,10 +81,11 @@ const AISelectorCommands = ({
       <CommandGroup heading="Use AI to do more">
         <CommandItem
           onSelect={() => {
-            const pos = editor.state.selection.from;
-
-            const text = getPrevText(editor, pos);
-            onSelect(text, "CONTINUE");
+            const pos = editor?.state.selection.from;
+            if (editor && pos) {
+              const text = getPrevText(editor, pos);
+              onSelect(text, "CONTINUE");
+            }
           }}
           value="continue"
           className="gap-2 px-4 cursor-pointer">

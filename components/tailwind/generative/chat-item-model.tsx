@@ -29,7 +29,12 @@ const ChatItemModel = ({ chat, isActive, setIsActive }: ChatItemModelProps) => {
         const session = await getSession();
         const res = await axios.get(
           `${process.env.NEXT_PUBLIC_API_URL}/api/get_chats_by_session_id/`,
-          { params: { session_id, user_id: session?.user?.pk } }
+          {
+            params: {
+              session_id,
+              user_id: (session?.user as { pk: number })?.pk,
+            },
+          }
         );
         setChatItemHis(res.data.chats);
       } catch (error) {

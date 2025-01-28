@@ -37,6 +37,16 @@ const Tooltip = React.forwardRef<TooltipElement, TooltipProps>(
       disableHoverableContent,
     };
 
+    // Client-side only logic
+    const isClient = typeof window !== "undefined";
+    const resolvedContainer = isClient
+      ? container instanceof Element
+        ? container // If container is already an Element, use it directly
+        : typeof container === "string" && container.trim() !== ""
+        ? document.querySelector(container) // Otherwise, treat container as a string and query for the element
+        : document.body // Default to document.body if container is invalid
+      : null; // No DOM access on SSR
+
     return (
       <TooltipPrimitive.TooltipProvider>
         <TooltipPrimitive.Root {...rootProps}>
@@ -44,8 +54,8 @@ const Tooltip = React.forwardRef<TooltipElement, TooltipProps>(
             {children}
           </TooltipPrimitive.Trigger>
           <TooltipPrimitive.Portal
-            container={container}
-            forceMount={forceMount}>
+            container={resolvedContainer} // Pass the resolved container safely
+            forceMount={forceMount === true ? true : undefined}>
             <TooltipPrimitive.Content
               sideOffset={4}
               collisionPadding={10}
