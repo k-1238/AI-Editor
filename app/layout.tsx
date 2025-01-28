@@ -6,10 +6,9 @@ import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import Providers from "./providers";
 
-const title =
-  "Novel - Notion-style WYSIWYG editor with AI-powered autocompletions";
+const title = "AI-Editor";
 const description =
-  "Novel is a Notion-style WYSIWYG editor with AI-powered autocompletions. Built with Tiptap, OpenAI, and Vercel AI SDK.";
+  "A simple AI-powered markdown editor that uses OpenAI's GPT-4o mini API to generate markdown content.";
 
 export const metadata: Metadata = {
   title,
