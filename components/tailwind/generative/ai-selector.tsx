@@ -72,52 +72,49 @@ export function AISelector({ onOpenChange }: AISelectorProps) {
       while (true) {
         const { value, done } = await reader.read();
         if (done) break;
-
         const chunk = decoder.decode(value);
         output += chunk;
-        if (selectedOption !== "chart" && selectedOption !== "") {
+
+      }
+      if (selectedOption !== null && selectedOption !== "") {
+        if (selectedOption !== "chart") {
           if (editor) {
-            const { from, to } = editor.state.selection;
-            editor.commands.setTextSelection({ from, to });
-            editor.commands.insertContent(chunk.toString());
+            const { from, to } = editor?.state.selection;
+            editor.commands.insertContentAt({ from, to }, output);
           }
         }
-      }
-      if (selectedOption === "") {
-        return;
-      }
-      if (selectedOption === "chart") {
-        try {
-          const sanitizedOutput = output
-            .replace(/`/g, "")
-            .replace(/javascript/g, "")
-            .replace(/([a-zA-Z0-9_]+):/g, '"$1":')
-            .replace(/'([^']+)'/g, '"$1"');
-          const parsedData = JSON.parse(sanitizedOutput);
-          editor?.commands.insertContent({
-            type: "chart",
-            attrs: {
-              data: parsedData,
-            },
-          });
-        } catch (error) {
-          toast.error("Failed to process the streamed response.");
+        if (selectedOption === "chart") {
+          try {
+            const sanitizedOutput = output
+              .replace(/`/g, "")
+              .replace(/javascript/g, "")
+              .replace(/([a-zA-Z0-9_]+):/g, '"$1":')
+              .replace(/'([^']+)'/g, '"$1"');
+            const parsedData = JSON.parse(sanitizedOutput);
+            editor?.commands.insertContent({
+              type: "chart",
+              attrs: {
+                data: parsedData,
+              },
+            });
+          } catch (error) {
+            toast.error("Failed to process the streamed response.");
+          }
         }
-      }
-      if (output && selectedValue && selectedOption && sessionUUID) {
-        const data = {
-          option: selectedOption,
-          command: selectedValue,
-          session_id: sessionUUID,
-          collectedMsg: output,
-        };
+        if (output && selectedValue && selectedOption && sessionUUID) {
+          const data = {
+            option: selectedOption,
+            command: selectedValue,
+            session_id: sessionUUID,
+            collectedMsg: output,
+          };
 
-        handleSaveChat(data);
+          handleSaveChat(data);
+        }
       }
     },
 
     onFinish: () => {
-      console.log("finish");
       complete("");
     },
     onError: (e) => {

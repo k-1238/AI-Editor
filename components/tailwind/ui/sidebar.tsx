@@ -135,7 +135,7 @@ export default function Sidebar({ open }: SidebarProps) {
           <Plus size={20} className="cursor-pointer" />
         </Tooltip>
       </div>
-      <div className="w-full overflow-y-auto space-y-2 h-screen">
+      <div className="w-full flex-grow overflow-y-auto space-y-2">
         {getFilteredChats.length > 0 &&
           getFilteredChats.map((chat: Chat, index: number) => (
             <ChatItemModel
@@ -161,7 +161,7 @@ export default function Sidebar({ open }: SidebarProps) {
         )}
         {hasNext && <div ref={observerRef} />}
       </div>
-      <div className="flex items-center justify-center border-t-2 border-b-2 px-5 py-7">
+      <div className="flex items-center mt-auto justify-center border-t-2 border-b-2 px-5 py-7">
         Upgrade Version
       </div>
     </div>

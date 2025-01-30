@@ -36,7 +36,7 @@ export default function Page() {
           <Sidebar open={open} />
         </SheetContent>
       </Sheet>
-      <div className="flex min-h-screen w-full flex-col items-center gap-4 py-4 sm:px-5">
+      <div className="flex w-full flex-col items-center gap-4 py-4 sm:px-5">
         <div className="flex w-full items-center gap-2 px-4 sm:mb-[calc(15vh)]">
           <PanelRight
             className="sm:hidden cursor-pointer"
@@ -53,7 +53,9 @@ export default function Page() {
           <Menu />
         </div>
 
-        <TailwindAdvancedEditor />
+        <div className="relative w-full flex justify-center">
+          <TailwindAdvancedEditor />
+        </div>
       </div>
     </div>
   );
