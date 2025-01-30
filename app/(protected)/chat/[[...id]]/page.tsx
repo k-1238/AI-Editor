@@ -4,7 +4,7 @@ import Menu from "@/components/tailwind/ui/menu";
 import Sidebar from "@/components/tailwind/ui/sidebar";
 import { LogOut } from "lucide-react";
 import { PanelRight } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Sheet, SheetContent } from "@/components/tailwind/ui/sheet";
 import { logout } from "@/actions/logout";
 import { Button } from "@/components/tailwind/ui/button";
@@ -12,6 +12,21 @@ import { Tooltip } from "@/components/tailwind/ui/tooltip";
 
 export default function Page() {
   const [open, setOpen] = useState(false);
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 640) {
+        // This assumes desktop starts at 1024px
+        setOpen(false); // Automatically close on desktop
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    handleResize(); // Call once on component mount to handle initial load
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
   return (
     <div className="flex flex-row">
       {/* Sidebar Component */}

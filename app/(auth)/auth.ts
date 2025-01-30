@@ -9,6 +9,7 @@ interface ExtendedUser extends User {
   accessToken: string;
   refreshToken: string;
   ref: number;
+  user_id: string;
 }
 
 interface ExtendedSession extends Session {
@@ -17,6 +18,7 @@ interface ExtendedSession extends Session {
     accessToken: string;
     refreshToken: string;
     ref: number;
+    user_id: string;
   };
 }
 
@@ -108,9 +110,11 @@ export const {
           accessToken: user.accessToken,
           refreshToken: user.refreshToken,
           ref: getCurrentEpochTime() + BACKEND_ACCESS_TOKEN_LIFETIME,
+          user_id: user.pk,
         };
       }
       if (account && account.provider === "google") {
+        token.user.user_id = (account as any).providerAccountId;
         token.accessToken = (account as any).accessToken;
         token.refreshToken = (account as any).refreshToken;
         token.ref = getCurrentEpochTime() + BACKEND_ACCESS_TOKEN_LIFETIME;
@@ -138,6 +142,7 @@ export const {
         }
       }
       if (account && account.provider === "github") {
+        token.user.user_id = (account as any).providerAccountId;
         token.accessToken = (account as ExtendedUser).accessToken;
         token.refreshToken = (account as ExtendedUser).refreshToken;
         token.ref = getCurrentEpochTime() + BACKEND_ACCESS_TOKEN_LIFETIME;
@@ -183,6 +188,7 @@ export const {
       const extendedSession: ExtendedSession = {
         ...session,
         user: token.user as User,
+        user_id: token.user.user_id,
       };
       return extendedSession;
     },

@@ -59,15 +59,12 @@ type chatData = z.infer<typeof chatSchema>;
 // Define the Zustand store
 interface chatStore {
   chats: Chat[];
-  setChats: (chat: Chat[]) => void;
+  setChats: (chat: Chat[]) => void; //pagination
   chatItemHis: HistoryType[];
   setChatItemHis: (itemHis: HistoryType[]) => void;
   searchStream: string;
   setSearchStream: (value: string) => void;
   addChat: (item: Chat) => void;
-  addChatHis: (item: HistoryType) => void;
-  chartData: ChartData;
-  setChartData: (chartData: ChartData) => void;
 }
 
 const useChatStore = create<chatStore>((set) => ({
@@ -75,9 +72,20 @@ const useChatStore = create<chatStore>((set) => ({
   chatItemHis: [],
   searchStream: "",
   setChats: (newChats: Chat[]) =>
-    set((state: { chats: Chat[] }) => ({
-      chats: [...state.chats, ...newChats], // Combine the old and new arrays
-    })),
+    set((state: { chats: Chat[] }) => {
+      const updatedChats = [...state.chats, ...newChats];
+      const uniqueChats = Array.from(
+        new Set(updatedChats.map((chat) => chat.created_at)) // Set ensures uniqueness based on 'created_at'
+      )
+        .map(
+          (created_at) =>
+            updatedChats.find((chat) => chat.created_at === created_at) // Find the unique chats based on 'created_at'
+        )
+        .filter((chat): chat is Chat => chat !== undefined); // Filter out undefined values
+
+      return { chats: uniqueChats };
+    }),
+
   setChatItemHis: (itemHis: HistoryType[]) =>
     set((state) => ({
       chatItemHis: itemHis,
@@ -85,13 +93,9 @@ const useChatStore = create<chatStore>((set) => ({
 
   setSearchStream: (value) => set(() => ({ searchStream: value })),
   addChat: (item: Chat) =>
-    set((state) => ({
-      chats: [...state.chats, item],
-    })),
-  addChatHis: (newItem: HistoryType) =>
     set((state) => {
-      const exists = state.chatItemHis.some(
-        (item: HistoryType) => item.session_id === newItem.session_id
+      const exists = state.chats.some(
+        (chat: Chat) => chat.session_id === item.session_id
       );
 
       // If it exists, return the current state without changes
@@ -101,22 +105,9 @@ const useChatStore = create<chatStore>((set) => ({
 
       // Otherwise, add the new item
       return {
-        chatItemHis: [...state.chatItemHis, newItem],
+        chats: [...state.chats, item],
       };
     }),
-  chartData: {
-    labels: [],
-    datasets: [
-      {
-        label: "",
-        data: [],
-        backgroundColor: [],
-        borderColor: [],
-        borderWidth: 1,
-      },
-    ],
-  },
-  setChartData: (chartData: ChartData) => set(() => ({ chartData })),
 }));
 
 export default useChatStore;

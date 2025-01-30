@@ -13,6 +13,7 @@ import { getSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import ChatItemModel from "../generative/chat-item-model";
 import { toast } from "sonner";
+import { Tooltip } from "./tooltip";
 
 export type Chat = {
   created_at: string;
@@ -38,7 +39,6 @@ type SidebarProps = {
 };
 
 export default function Sidebar({ open }: SidebarProps) {
-  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [cursor, setCursor] = useState<string | null>("");
   const observerRef = useRef<HTMLDivElement>(null);
@@ -53,7 +53,10 @@ export default function Sidebar({ open }: SidebarProps) {
       const res = await axios.get(
         `${process.env.NEXT_PUBLIC_API_URL}/api/get_first_chats/`,
         {
-          params: { cursor, user_id: (session?.user as { pk: number })?.pk },
+          params: {
+            cursor,
+            user_id: (session?.user as Record<string, any>)?.user_id,
+          },
         }
       );
       const { next_cursor, has_next, chats } = res.data;
@@ -125,21 +128,12 @@ export default function Sidebar({ open }: SidebarProps) {
       }  overflow-x-hidden flex flex-col`}>
       <div className="flex flex-row items-center justify-between px-5 py-7">
         <Sparkles className="h-15 w-15" size={40} />
-        <div className="flex justify-start ml-2">
+        <div className="flex justify-start mx-2">
           <Search />
         </div>
-        {/* <div className="flex flex-row space-x-2">
-          <Tooltip content="New Chart" className="text-sm">
-            <Plus
-              size={20}
-              className="cursor-pointer"
-              onClick={() => {
-                router.push("/chat");
-              }}
-            />
-          </Tooltip>
-          <FlipVerticalIcon size={20} className="cursor-pointer" />
-        </div> */}
+        <Tooltip content="New Chat" className="text-sm">
+          <Plus size={20} className="cursor-pointer" />
+        </Tooltip>
       </div>
       <div className="w-full overflow-y-auto space-y-2 h-screen">
         {getFilteredChats.length > 0 &&

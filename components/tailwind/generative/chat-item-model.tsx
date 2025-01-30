@@ -32,7 +32,7 @@ const ChatItemModel = ({ chat, isActive, setIsActive }: ChatItemModelProps) => {
           {
             params: {
               session_id,
-              user_id: (session?.user as { pk: number })?.pk,
+              user_id: (session?.user as Record<string, any>)?.user_id,
             },
           }
         );

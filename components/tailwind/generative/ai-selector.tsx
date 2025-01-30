@@ -26,60 +26,33 @@ export function AISelector({ onOpenChange }: AISelectorProps) {
   const { editor } = useEditor();
   const [inputValue, setInputValue] = useState("");
   const sessionUUID = useSessionUUID();
-  const [streamedOutput, setStreamedOutput] = useState("");
   const [selectedValue, setSelectedValue] = useState<any>(null);
   const [selectedOption, setSelectedOption] = useState<any>(null);
-  const { addChat, addChatHis, setChartData } = useChatStore();
-  const [chartType, setChartType] = useState("");
-  const [collectedMsg, setCollectedMsg] = useState<string | null>(null);
-  const handleSaveChat = useCallback(
-    async (data: any) => {
-      const session = await getSession();
-      try {
-        await axios
-          .post(`${process.env.NEXT_PUBLIC_API_URL}/api/save_chat`, {
-            option: data.option,
-            command: data.command,
-            session_id: data.session_id,
-            collectedMsg: data.collectedMsg,
-            prompt: data.command,
-            user_id: (session?.user as { pk: number })?.pk,
-          })
-          .then((res) => {
-            addChat(res.data.user);
-            addChatHis(res.data.chatHis);
-          });
-      } catch (error) {
-        toast.error("Something went wrong. Please try again.");
-      }
-    },
-    [collectedMsg]
-  );
-
-  useEffect(() => {
-    if (collectedMsg && selectedValue && selectedOption && sessionUUID) {
-      const data = {
-        option: selectedOption,
-        command: selectedValue,
-        session_id: sessionUUID,
-        collectedMsg: collectedMsg,
-      };
-
-      handleSaveChat(data);
+  const { addChat } = useChatStore();
+  const handleSaveChat = useCallback(async (data: any) => {
+    const session = await getSession();
+    try {
+      await axios
+        .post(`${process.env.NEXT_PUBLIC_API_URL}/api/save_chat`, {
+          option: data.option,
+          command: data.command,
+          session_id: data.session_id,
+          collectedMsg: data.collectedMsg,
+          prompt: data.command,
+          user_id: (session?.user as Record<string, any>)?.user_id,
+        })
+        .then((res) => {
+          addChat(res.data.user);
+        });
+    } catch (error) {
+      toast.error("Something went wrong. Please try again.");
     }
-  }, [
-    handleSaveChat,
-    collectedMsg,
-    sessionUUID,
-    selectedValue,
-    selectedOption,
-  ]);
+  }, []);
 
   const { completion, complete, isLoading } = useCompletion({
     id: uuidv4(),
     api: `${process.env.NEXT_PUBLIC_API_URL}/api/create_chat_stream`,
     onResponse: async (response) => {
-      setStreamedOutput("");
       if (response.status === 429) {
         toast.error("You have reached your request limit for the day.");
         return;
@@ -87,9 +60,6 @@ export function AISelector({ onOpenChange }: AISelectorProps) {
       if (response.status === 500) {
         toast.error("Something went wrong. Please try again.");
         return;
-      }
-      if (response.body?.locked) {
-        toast.error("Stream is already locked!");
       }
       const reader = response.body?.getReader();
       if (!reader) {
@@ -99,31 +69,24 @@ export function AISelector({ onOpenChange }: AISelectorProps) {
 
       let output = "";
       const decoder = new TextDecoder();
-
-      // Read chunks from the stream
       while (true) {
         const { value, done } = await reader.read();
         if (done) break;
 
         const chunk = decoder.decode(value);
         output += chunk;
-        if (chartType !== "chart" && chartType !== "") {
-          // setStreamedOutput((prev) => prev + chunk);
+        if (selectedOption !== "chart" && selectedOption !== "") {
           if (editor) {
-            if (editor) {
-              const { from, to } = editor.state.selection;
-              editor.commands.setTextSelection({ from, to });
-              editor.commands.insertContent(chunk.toString());
-            }
+            const { from, to } = editor.state.selection;
+            editor.commands.setTextSelection({ from, to });
+            editor.commands.insertContent(chunk.toString());
           }
         }
       }
-
-      setCollectedMsg(output);
-      if (chartType === "") {
+      if (selectedOption === "") {
         return;
       }
-      if (chartType === "chart") {
+      if (selectedOption === "chart") {
         try {
           const sanitizedOutput = output
             .replace(/`/g, "")
@@ -137,23 +100,33 @@ export function AISelector({ onOpenChange }: AISelectorProps) {
               data: parsedData,
             },
           });
-          setChartData(parsedData);
         } catch (error) {
           toast.error("Failed to process the streamed response.");
         }
       }
+      if (output && selectedValue && selectedOption && sessionUUID) {
+        const data = {
+          option: selectedOption,
+          command: selectedValue,
+          session_id: sessionUUID,
+          collectedMsg: output,
+        };
+
+        handleSaveChat(data);
+      }
     },
 
     onFinish: () => {
+      console.log("finish");
       complete("");
     },
     onError: (e) => {
-      // toast.error(e.message);
+      toast.error(e.message);
     },
   });
 
   useEffect(() => {
-    if (selectedOption && selectedValue !== "")
+    if (selectedOption && selectedValue !== "" && sessionUUID) {
       complete(selectedValue, {
         body: {
           option: selectedOption,
@@ -161,7 +134,8 @@ export function AISelector({ onOpenChange }: AISelectorProps) {
           session_id: sessionUUID,
         },
       });
-  }, [chartType]);
+    }
+  }, [selectedOption, selectedValue, sessionUUID]);
 
   const hasCompletion = completion.length > 0;
 
@@ -230,8 +204,6 @@ export function AISelector({ onOpenChange }: AISelectorProps) {
                     command: text,
                     session_id: sessionUUID,
                   },
-                }).then(() => {
-                  setSelectedOption("zap");
                 });
               }}>
               <ArrowUp className="h-4 w-4" />
@@ -246,11 +218,9 @@ export function AISelector({ onOpenChange }: AISelectorProps) {
               completion={completion}
             />
           ) : (
-            // fix, shorter,longer, improve, instruction,continue, chart
+            // fix, improve, chart
             <AISelectorCommands
-              setChartType={setChartType}
               onSelect={async (value, option) => {
-                setChartType(option);
                 setSelectedOption(option);
                 setSelectedValue(value);
                 const data = {
@@ -264,15 +234,6 @@ export function AISelector({ onOpenChange }: AISelectorProps) {
           )}
         </>
       )}
-      {/* Displaying the streamed output progressively */}
-      {/* {streamedOutput && (
-        <div className="mt-4 max-h-[30vh] overflow-auto px-2 py-1">
-          <h3 className="font-bold justify-self-center">AI Response:</h3>
-          <div className="prose p-2 px-4 prose-sm">
-            <Markdown>{streamedOutput}</Markdown>
-          </div>
-        </div>
-      )} */}
     </Command>
   );
 }
