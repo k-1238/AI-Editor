@@ -9,9 +9,11 @@ import { Sheet, SheetContent } from "@/components/tailwind/ui/sheet";
 import { logout } from "@/actions/logout";
 import { Button } from "@/components/tailwind/ui/button";
 import { Tooltip } from "@/components/tailwind/ui/tooltip";
+import useChatStore from "@/hooks/chatStore";
 
 export default function Page() {
   const [open, setOpen] = useState(false);
+  const { resetChats } = useChatStore();
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 640) {
@@ -46,7 +48,7 @@ export default function Page() {
             <Button
               className="ml-auto"
               variant={"ghost"}
-              onClick={() => logout()}>
+              onClick={() => { resetChats(), logout() }}>
               <LogOut>LogOut</LogOut>
             </Button>
           </Tooltip>

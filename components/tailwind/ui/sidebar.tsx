@@ -20,6 +20,7 @@ export type Chat = {
   session_id: string;
   content: string;
   user_question: string;
+  title: string;
 };
 
 export type HistoryType = {
@@ -48,8 +49,8 @@ export default function Sidebar({ open }: SidebarProps) {
   const handlePaginate = useCallback(async () => {
     if (isLoading) return; // Prevent fetching if loading or cursor is null
     setIsLoading(true);
+    const session = await getSession();
     try {
-      const session = await getSession();
       const res = await axios.get(
         `${process.env.NEXT_PUBLIC_API_URL}/api/get_first_chats/`,
         {

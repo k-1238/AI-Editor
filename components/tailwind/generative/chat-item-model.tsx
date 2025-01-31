@@ -60,7 +60,7 @@ const ChatItemModel = ({ chat, isActive, setIsActive }: ChatItemModelProps) => {
             <div className="rounded-sm border p-1">
               <MessageCircle className="h-4 w-4" />
             </div>
-            <span>{chat.content && chat.content.slice(0, 20)}...</span>
+            <span>{chat.title.slice(0, 35)}</span>
           </div>
           {isActive === chat.session_id && <Check className="h-4 w-4" />}
         </Button>

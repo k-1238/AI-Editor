@@ -6,6 +6,7 @@ type Chat = {
   session_id: string;
   content: string;
   user_question: string;
+  title: string;
 };
 
 export type HistoryType = {
@@ -65,12 +66,14 @@ interface chatStore {
   searchStream: string;
   setSearchStream: (value: string) => void;
   addChat: (item: Chat) => void;
+  resetChats: () => void;
 }
 
 const useChatStore = create<chatStore>((set) => ({
   chats: [],
   chatItemHis: [],
   searchStream: "",
+  resetChats: () => set({ chats: [] }),
   setChats: (newChats: Chat[]) =>
     set((state: { chats: Chat[] }) => {
       const updatedChats = [...state.chats, ...newChats];
