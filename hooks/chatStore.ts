@@ -1,5 +1,7 @@
 import { create } from "zustand";
 import { z } from "zod";
+import { JSONContent } from "novel";
+import { defaultEditorContent } from "@/lib/content";
 
 type Chat = {
   created_at: string;

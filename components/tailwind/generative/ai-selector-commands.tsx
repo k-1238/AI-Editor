@@ -34,11 +34,8 @@ const AISelectorCommands = ({ onSelect }: AISelectorCommandsProps) => {
         {options.map((option) => (
           <CommandItem
             onSelect={(value) => {
-              const slice = editor?.state.selection.content();
-              const text = editor?.storage.markdown.serializer.serialize(
-                slice?.content
-              );
-              onSelect(text, value);
+              const selectedText = editor?.state.selection.content().content.textBetween(0, editor?.state.selection.content().content.size, "\n") || "";
+              onSelect(selectedText, value);
             }}
             className="flex gap-2 px-4 cursor-pointer"
             key={option.value}

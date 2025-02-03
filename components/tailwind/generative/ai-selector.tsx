@@ -25,7 +25,7 @@ interface AISelectorProps {
 export function AISelector({ onOpenChange }: AISelectorProps) {
   const { editor } = useEditor();
   const [inputValue, setInputValue] = useState("");
-  const sessionUUID = useSessionUUID();
+  const {sessionUUID} = useSessionUUID();
   const [selectedValue, setSelectedValue] = useState<any>(null);
   const [selectedOption, setSelectedOption] = useState<any>(null);
   const { addChat } = useChatStore();
@@ -34,12 +34,12 @@ export function AISelector({ onOpenChange }: AISelectorProps) {
     try {
       await axios
         .post(`${process.env.NEXT_PUBLIC_API_URL}/api/save_chat`, {
-          option: data.option,
-          command: data.command,
-          session_id: data.session_id,
-          collectedMsg: data.collectedMsg,
-          prompt: data.command,
-          user_id: (session?.user as Record<string, any>)?.user_id,
+          option: data.option, // option
+          command: data.command, // selectedText
+          session_id: data.session_id, // session_id
+          collectedMsg: data.collectedMsg, // ai response
+          prompt: data.option === "zap" ? inputValue : data.command, // zap, fix, instruction, chart
+          user_id: (session?.user as Record<string, any>)?.user_id, // user_id
         })
         .then((res) => {
           addChat(res.data.user);
@@ -74,15 +74,17 @@ export function AISelector({ onOpenChange }: AISelectorProps) {
         if (done) break;
         const chunk = decoder.decode(value);
         output += chunk;
-
-      }
-      if (selectedOption !== null && selectedOption !== "") {
-        if (selectedOption !== "chart") {
-          if (editor) {
-            const { from, to } = editor?.state.selection;
-            editor.commands.insertContentAt({ from, to }, output);
+        if (selectedOption !== null && selectedOption !== "") {
+          if (selectedOption !== "chart") {
+            if (editor) {
+              const {from, to} = editor.state.selection;
+              editor.commands.setTextSelection({from, to});
+              editor.commands.insertContent(chunk);
+            }
           }
         }
+      }
+      if (selectedOption !== null && selectedOption !== "") {
         if (selectedOption === "chart") {
           try {
             const sanitizedOutput = output
@@ -98,17 +100,16 @@ export function AISelector({ onOpenChange }: AISelectorProps) {
               },
             });
           } catch (error) {
-            toast.error("Failed to process the streamed response.");
+            toast.error("Failed to process the streamed response for Chart Generator");
           }
         }
         if (output && selectedValue && selectedOption && sessionUUID) {
           const data = {
-            option: selectedOption,
-            command: selectedValue,
-            session_id: sessionUUID,
-            collectedMsg: output,
+            option: selectedOption, // option
+            command: selectedValue, // selectedText
+            session_id: sessionUUID, // session_id
+            collectedMsg: output, // ai response
           };
-
           handleSaveChat(data);
         }
       }
@@ -118,7 +119,7 @@ export function AISelector({ onOpenChange }: AISelectorProps) {
       complete("");
     },
     onError: (e) => {
-      toast.error(e.message);
+      // toast.error(e.message);
     },
   });
 
@@ -126,9 +127,9 @@ export function AISelector({ onOpenChange }: AISelectorProps) {
     if (selectedOption && selectedValue !== "" && sessionUUID) {
       complete(selectedValue, {
         body: {
-          option: selectedOption,
-          command: selectedValue,
-          session_id: sessionUUID,
+          option: selectedOption, // option
+          command: selectedValue, // selectedText
+          session_id: sessionUUID, // sessionId
         },
       });
     }
@@ -173,36 +174,23 @@ export function AISelector({ onOpenChange }: AISelectorProps) {
                 if (editor) addAIHighlight(editor);
               }}
             />
-            {/* Zad */}
+            {/* Zap */}
             <Button
               size="icon"
               className="absolute right-2 top-1/2 h-6 w-6 -translate-y-1/2 rounded-full bg-purple-500 hover:bg-purple-900"
               onClick={async () => {
-                if (completion)
-                  return complete(completion, {
-                    body: {
-                      option: "zap",
-                      command: inputValue,
-                      session_id: sessionUUID,
-                    },
-                  }).then(() => {
-                    setInputValue("");
-                  });
-
-                const slice = editor?.state.selection.content();
-                const text = editor?.storage.markdown.serializer.serialize(
-                  slice?.content
-                );
-                setSelectedValue(inputValue);
+                const selectedText =
+                  editor?.state.selection
+                    .content()
+                    .content.textBetween(
+                      0,
+                      editor?.state.selection.content().content.size,
+                      "\n"
+                    ) || "";
+                setSelectedValue(selectedText);
                 setSelectedOption("zap");
-                await complete(text, {
-                  body: {
-                    option: "zap",
-                    command: text,
-                    session_id: sessionUUID,
-                  },
-                });
-              }}>
+              }}
+            >
               <ArrowUp className="h-4 w-4" />
             </Button>
           </div>
@@ -217,15 +205,9 @@ export function AISelector({ onOpenChange }: AISelectorProps) {
           ) : (
             // fix, improve, chart
             <AISelectorCommands
-              onSelect={async (value, option) => {
+              onSelect={async (selectedText, option) => {
                 setSelectedOption(option);
-                setSelectedValue(value);
-                const data = {
-                  option: option,
-                  command: value,
-                  session_id: sessionUUID,
-                };
-                await complete(value, { body: data });
+                setSelectedValue(selectedText);
               }}
             />
           )}

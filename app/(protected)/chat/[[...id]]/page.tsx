@@ -32,10 +32,10 @@ export default function Page() {
   return (
     <div className="flex flex-row">
       {/* Sidebar Component */}
-      <Sidebar />
+      <Sidebar/>
       <Sheet open={open} onOpenChange={() => setOpen(false)}>
         <SheetContent>
-          <Sidebar open={open} />
+          <Sidebar open={open}/>
         </SheetContent>
       </Sheet>
       <div className="flex w-full flex-col items-center gap-4 py-4 sm:px-5">

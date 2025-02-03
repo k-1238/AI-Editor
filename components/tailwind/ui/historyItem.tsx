@@ -30,10 +30,7 @@ const HistoryItem = () => {
                 <ScrollArea className="max-w-full">
                   <div
                     className="mr-2 py-3 px-4 bg-blue-400 rounded-bl-3xl rounded-tl-3xl rounded-tr-xl text-white"
-                    dangerouslySetInnerHTML={{
-                      __html: parseTitleFromQuestion(item.user_question) || "", // Fallback to an empty string
-                    }}
-                  />
+                  ><p>{item.user_question}</p></div>
                 </ScrollArea>
               </div>
 

@@ -5,15 +5,13 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { Sparkles, Plus, FlipVerticalIcon, LucideLoader } from "lucide-react";
+import { Sparkles, LucideLoader } from "lucide-react";
 import Search from "./animate-search/search";
 import axios from "axios";
 import useChatStore from "@/hooks/chatStore";
 import { getSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import ChatItemModel from "../generative/chat-item-model";
 import { toast } from "sonner";
-import { Tooltip } from "./tooltip";
 
 export type Chat = {
   created_at: string;
@@ -121,7 +119,6 @@ export default function Sidebar({ open }: SidebarProps) {
       item.user_question.toLowerCase().includes(searchStream.toLowerCase())
     );
   }, [chats, searchStream]);
-
   return (
     <div
       className={`h-screen sm:min-w-[289px] ${
@@ -132,9 +129,6 @@ export default function Sidebar({ open }: SidebarProps) {
         <div className="flex justify-start mx-2">
           <Search />
         </div>
-        <Tooltip content="New Chat" className="text-sm">
-          <Plus size={20} className="cursor-pointer" />
-        </Tooltip>
       </div>
       <div className="w-full flex-grow overflow-y-auto space-y-2">
         {getFilteredChats.length > 0 &&
@@ -155,7 +149,7 @@ export default function Sidebar({ open }: SidebarProps) {
             />
           </div>
         )}
-        {!hasNext && (
+        {!hasNext && !isLoading && (
           <div className="w-full flex justify-center items-center">
             <p className="text-gray-500">No chats available</p>
           </div>
