@@ -11,7 +11,7 @@ import { Chat } from "../ui/sidebar";
 import { useCallback, useState } from "react";
 import { getSession } from "next-auth/react";
 import axios from "axios";
-import useChatStore from "@/hooks/chatStore";
+import useChatStore, { HistoryType } from "@/hooks/chatStore";
 import { toast } from "sonner";
 type ChatItemModelProps = {
   chat: Chat;
@@ -19,7 +19,7 @@ type ChatItemModelProps = {
   setIsActive: React.Dispatch<React.SetStateAction<string>>;
 };
 const ChatItemModel = ({ chat, isActive, setIsActive }: ChatItemModelProps) => {
-  const { setChatItemHis } = useChatStore();
+  const { fetchChatItemHis } = useChatStore();
   const [isFetching, setIsFetching] = useState(false);
   const handleFetchChatsBySessionID = useCallback(
     async (session_id: string) => {
@@ -36,14 +36,14 @@ const ChatItemModel = ({ chat, isActive, setIsActive }: ChatItemModelProps) => {
             },
           }
         );
-        setChatItemHis(res.data.chats);
+        fetchChatItemHis(res.data.chats);
       } catch (error) {
         toast.error("Error fetching chats by session ID");
       } finally {
         setIsFetching(false);
       }
     },
-    [isFetching, setChatItemHis]
+    [isFetching, fetchChatItemHis]
   );
   return (
     <Dialog>
@@ -60,7 +60,12 @@ const ChatItemModel = ({ chat, isActive, setIsActive }: ChatItemModelProps) => {
             <div className="rounded-sm border p-1">
               <MessageCircle className="h-4 w-4" />
             </div>
-            <span>{chat.title && chat.title.length > 25 ? chat.title.slice(0, 25): chat.title}...</span>
+            <span>
+              {chat.title && chat.title.length > 25
+                ? chat.title.slice(0, 25)
+                : chat.title}
+              ...
+            </span>
           </div>
           {isActive === chat.session_id && <Check className="h-4 w-4" />}
         </Button>

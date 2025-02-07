@@ -10,16 +10,32 @@ import { logout } from "@/actions/logout";
 import { Button } from "@/components/tailwind/ui/button";
 import { Tooltip } from "@/components/tailwind/ui/tooltip";
 import useChatStore from "@/hooks/chatStore";
+import ChatBox from "@/components/tailwind/ui/chatBox";
+import { CanvasLoading } from "@/components/Common/CanvasLoading";
+import { LuArrowUpNarrowWide } from "react-icons/lu";
 
 export default function Page() {
   const [open, setOpen] = useState(false);
-  const { resetChats } = useChatStore();
+  const { resetChats, chatStarted } = useChatStore();
+  const [showSkeleton, setShowSkeleton] = useState(true);
+  const [isOpenChatBox, setIsOpenChatBox] = useState(false);
+
+  useEffect(() => {
+    if (chatStarted) {
+      const timer = setTimeout(() => {
+        setShowSkeleton(false);
+      }, 1500); // Show skeleton for 500ms
+
+      return () => clearTimeout(timer);
+    }
+  }, [chatStarted]);
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 640) {
         // This assumes desktop starts at 1024px
         setOpen(false); // Automatically close on desktop
       }
+      if (window.innerWidth >= 1024) setIsOpenChatBox(false);
     };
 
     window.addEventListener("resize", handleResize);
@@ -30,35 +46,115 @@ export default function Page() {
     };
   }, []);
   return (
-    <div className="flex flex-row">
+    <div className="flex flex-row h-screen">
       {/* Sidebar Component */}
-      <Sidebar/>
+      <div
+        className={`transition-all duration-300 ${
+          chatStarted ? "sm:-ml-[289px]" : "ml-0"
+        }`}>
+        <Sidebar />
+      </div>
+
       <Sheet open={open} onOpenChange={() => setOpen(false)}>
         <SheetContent>
-          <Sidebar open={open}/>
+          <Sidebar open={open} />
         </SheetContent>
       </Sheet>
-      <div className="flex w-full flex-col items-center gap-4 py-4 sm:px-5">
-        <div className="flex w-full items-center gap-2 px-4 sm:mb-[calc(15vh)]">
+      {/* Main Content */}
+      <div
+        className={`flex transition-all duration-700 flex-col flex-1 items-center gap-4 py-4 sm:px-5 ${
+          chatStarted ? "lg:w-3/5" : "lg:w-full"
+        }`}>
+        <div
+          className={`flex w-full items-center gap-2 px-4 ${
+            !chatStarted && "sm:mb-[calc(5vh)]"
+          }`}>
           <PanelRight
-            className="sm:hidden cursor-pointer"
+            className="lg:hidden cursor-pointer"
             onClick={() => setOpen(!open)} // Toggle Sidebar visibility on click
           />
           <Tooltip content="Logout" className="text-sm">
             <Button
               className="ml-auto"
               variant={"ghost"}
-              onClick={() => { resetChats(), logout() }}>
+              onClick={() => {
+                resetChats(), logout();
+              }}>
               <LogOut>LogOut</LogOut>
             </Button>
           </Tooltip>
           <Menu />
         </div>
 
-        <div className="relative w-full flex justify-center">
-          <TailwindAdvancedEditor />
+        <div
+          className={`w-full py-5 flex flex-col ${
+            chatStarted && "justify-between"
+          }`}>
+          {/* Welcome Board */}
+          {!chatStarted && (
+            <div className="flex flex-col items-center text-center mt-8">
+              <div className="w-12 h-12 flex items-center justify-center dark:bg-gray-800 bg-cyan-300 rounded-full">
+                <svg
+                  className="w-6 h-6 text-blue-400"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"
+                  />
+                </svg>
+              </div>
+              <h1 className="text-2xl font-semibold">
+                Welcome To Our AI Power Editor
+              </h1>
+              <p className="text-blue-400 mt-2 text-lg">AI Power Editor</p>
+            </div>
+          )}
+
+          {/* Editor & Chat */}
+          <div
+            className={`flex flex-1 mt-5 shadow-md ${
+              chatStarted ? "h-[85vh]" : "h-[70vh]"
+            }`}>
+            <TailwindAdvancedEditor />
+          </div>
         </div>
       </div>
+      {chatStarted && (
+        <>
+          <div className="hidden lg:flex w-2/5 ml-auto overflow-auto h-[100vh] dark:border-l-2">
+            {showSkeleton ? (
+              <div className="w-full p-4">
+                <CanvasLoading />
+              </div>
+            ) : (
+              <ChatBox />
+            )}
+          </div>
+          <Sheet
+            open={isOpenChatBox}
+            onOpenChange={() => setIsOpenChatBox(false)}>
+            <SheetContent
+              side={"bottom"}
+              className="max-h-[90vh] overflow-auto">
+              <ChatBox />
+            </SheetContent>
+          </Sheet>
+          <div className="absolute bottom-3 left-1/2 lg:hidden -lg flex size-10 animate-bounce items-center justify-center rounded-full bg-white p-2 ring-1 ring-gray-900/5 dark:bg-white/5 dark:ring-white/20">
+            <Tooltip content="Chat" className="text-sm">
+              <LuArrowUpNarrowWide
+                color="blue"
+                className="cursor-pointer"
+                onClick={() => setIsOpenChatBox(true)}
+              />
+            </Tooltip>
+          </div>
+        </>
+      )}
     </div>
   );
 }

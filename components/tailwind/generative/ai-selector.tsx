@@ -25,10 +25,17 @@ interface AISelectorProps {
 export function AISelector({ onOpenChange }: AISelectorProps) {
   const { editor } = useEditor();
   const [inputValue, setInputValue] = useState("");
-  const {sessionUUID} = useSessionUUID();
+  const { sessionUUID } = useSessionUUID();
   const [selectedValue, setSelectedValue] = useState<any>(null);
   const [selectedOption, setSelectedOption] = useState<any>(null);
-  const { addChat } = useChatStore();
+  const {
+    addChat,
+    setChatStarted,
+    addMsg,
+    updateLastAiMsg,
+    isEditing,
+    setIsEditing,
+  } = useChatStore();
   const handleSaveChat = useCallback(async (data: any) => {
     const session = await getSession();
     try {
@@ -68,18 +75,27 @@ export function AISelector({ onOpenChange }: AISelectorProps) {
       }
 
       let output = "";
+      const aiMsgId = uuidv4();
       const decoder = new TextDecoder();
+      if (selectedOption === "zap") {
+        addMsg({ id: aiMsgId, role: "ai", content: "" });
+      }
+      setIsEditing(true);
       while (true) {
         const { value, done } = await reader.read();
         if (done) break;
         const chunk = decoder.decode(value);
         output += chunk;
         if (selectedOption !== null && selectedOption !== "") {
-          if (selectedOption !== "chart") {
-            if (editor) {
-              const {from, to} = editor.state.selection;
-              editor.commands.setTextSelection({from, to});
-              editor.commands.insertContent(chunk);
+          if (selectedOption === "zap") {
+            updateLastAiMsg(aiMsgId, chunk);
+          } else {
+            if (selectedOption !== "chart") {
+              if (editor) {
+                const { from, to } = editor.state.selection;
+                editor.commands.setTextSelection({ from, to });
+                editor.commands.insertContent(chunk);
+              }
             }
           }
         }
@@ -93,14 +109,20 @@ export function AISelector({ onOpenChange }: AISelectorProps) {
               .replace(/([a-zA-Z0-9_]+):/g, '"$1":')
               .replace(/'([^']+)'/g, '"$1"');
             const parsedData = JSON.parse(sanitizedOutput);
-            editor?.commands.insertContent({
-              type: "chart",
-              attrs: {
-                data: parsedData,
-              },
-            });
+            if (editor) {
+              const { from, to } = editor.state.selection;
+              editor.commands.setTextSelection({ from, to });
+              editor?.commands.insertContent({
+                type: "chart",
+                attrs: {
+                  data: parsedData,
+                },
+              });
+            }
           } catch (error) {
-            toast.error("Failed to process the streamed response for Chart Generator");
+            toast.error(
+              "Failed to process the streamed response for Chart Generator"
+            );
           }
         }
         if (output && selectedValue && selectedOption && sessionUUID) {
@@ -110,21 +132,24 @@ export function AISelector({ onOpenChange }: AISelectorProps) {
             session_id: sessionUUID, // session_id
             collectedMsg: output, // ai response
           };
-          handleSaveChat(data);
+          // handleSaveChat(data);
         }
       }
-    },
 
+      setIsEditing(false);
+    },
     onFinish: () => {
       complete("");
     },
-    onError: (e) => {
-      // toast.error(e.message);
-    },
+    onError: (e) => {},
   });
 
   useEffect(() => {
     if (selectedOption && selectedValue !== "" && sessionUUID) {
+      if (selectedOption === "zap") {
+        setChatStarted(true);
+        addMsg({ id: uuidv4(), role: "user", content: selectedValue });
+      }
       complete(selectedValue, {
         body: {
           option: selectedOption, // option
@@ -149,7 +174,7 @@ export function AISelector({ onOpenChange }: AISelectorProps) {
         </div>
       )}
 
-      {isLoading && (
+      {isEditing && (
         <div className="flex h-12 w-full items-center px-4 text-sm font-medium text-muted-foreground text-purple-500">
           <Magic className="mr-2 h-4 w-4 shrink-0  " />
           AI is thinking
@@ -158,7 +183,7 @@ export function AISelector({ onOpenChange }: AISelectorProps) {
           </div>
         </div>
       )}
-      {!isLoading && (
+      {!isEditing && (
         <>
           <div className="relative">
             <CommandInput
@@ -189,8 +214,7 @@ export function AISelector({ onOpenChange }: AISelectorProps) {
                     ) || "";
                 setSelectedValue(selectedText);
                 setSelectedOption("zap");
-              }}
-            >
+              }}>
               <ArrowUp className="h-4 w-4" />
             </Button>
           </div>
@@ -203,13 +227,15 @@ export function AISelector({ onOpenChange }: AISelectorProps) {
               completion={completion}
             />
           ) : (
-            // fix, improve, chart
-            <AISelectorCommands
-              onSelect={async (selectedText, option) => {
-                setSelectedOption(option);
-                setSelectedValue(selectedText);
-              }}
-            />
+            <>
+              {/* fix, improve, chart */}
+              <AISelectorCommands
+                onSelect={async (selectedText, option) => {
+                  setSelectedOption(option);
+                  setSelectedValue(selectedText);
+                }}
+              />
+            </>
           )}
         </>
       )}

@@ -1,7 +1,6 @@
 import { create } from "zustand";
 import { z } from "zod";
-import { JSONContent } from "novel";
-import { defaultEditorContent } from "@/lib/content";
+import { EditorInstance } from "novel";
 
 type Chat = {
   created_at: string;
@@ -59,44 +58,66 @@ const chatSchema = z.object({
 // Define the TypeScript type based on the schema
 type chatData = z.infer<typeof chatSchema>;
 
+interface ChatMessage {
+  id: string;
+  role: "user" | "ai";
+  content: string;
+}
+
 // Define the Zustand store
 interface chatStore {
+  // Editring
+  isEditing: boolean;
+  setIsEditing: (isEditing: boolean) => void;
+
+  // chat box
+  chatMsgs: ChatMessage[];
+  addMsg: (message: ChatMessage) => void;
+  updateLastAiMsg: (id: string, newContent: string) => void;
+
+  // add chat item in sidebar for pagination
   chats: Chat[];
-  setChats: (chat: Chat[]) => void; //pagination
+  addChat: (item: Chat) => void; // add chat when we start conversation with ai
+  resetChats: () => void;
+  setChats: (chat: Chat[]) => void; // fetch Data when we have first render
+
   chatItemHis: HistoryType[];
-  setChatItemHis: (itemHis: HistoryType[]) => void;
+  setChatItemHis: (itemHis: HistoryType) => void; // push item obj
+  fetchChatItemHis: (itemHis: HistoryType[]) => void; // fetch data arr
+
+  // Sidebar search
   searchStream: string;
   setSearchStream: (value: string) => void;
-  addChat: (item: Chat) => void;
-  resetChats: () => void;
+
+  // ai response stream
+  streamData: string;
+  setStreamData: (newData: string) => void;
+
+  // editor
+  editorInstance: EditorInstance | null;
+  setEditorInstance: (editor: EditorInstance) => void;
+
+  // chat status when we ask ai
+  chatStarted: boolean;
+  setChatStarted: (chatStarted: boolean) => void;
 }
 
 const useChatStore = create<chatStore>((set) => ({
-  chats: [],
-  chatItemHis: [],
-  searchStream: "",
-  resetChats: () => set({ chats: [] }),
-  setChats: (newChats: Chat[]) =>
-    set((state: { chats: Chat[] }) => {
-      const updatedChats = [...state.chats, ...newChats];
-      const uniqueChats = Array.from(
-        new Set(updatedChats.map((chat) => chat.created_at)) // Set ensures uniqueness based on 'created_at'
-      )
-        .map(
-          (created_at) =>
-            updatedChats.find((chat) => chat.created_at === created_at) // Find the unique chats based on 'created_at'
-        )
-        .filter((chat): chat is Chat => chat !== undefined); // Filter out undefined values
-
-      return { chats: uniqueChats };
+  isEditing: false,
+  setIsEditing: (isEditing: boolean) => set({ isEditing }),
+  chatMsgs: [],
+  addMsg: (message: ChatMessage) =>
+    set((state) => {
+      return { chatMsgs: [...state.chatMsgs, message] };
     }),
-
-  setChatItemHis: (itemHis: HistoryType[]) =>
+  updateLastAiMsg: (id, newContent) =>
     set((state) => ({
-      chatItemHis: itemHis,
+      chatMsgs: state.chatMsgs.map((msg) =>
+        msg.id === id ? { ...msg, content: msg.content + newContent } : msg
+      ),
     })),
 
-  setSearchStream: (value) => set(() => ({ searchStream: value })),
+  chats: [],
   addChat: (item: Chat) =>
     set((state) => {
       const exists = state.chats.some(
@@ -113,6 +134,40 @@ const useChatStore = create<chatStore>((set) => ({
         chats: [...state.chats, item],
       };
     }),
+  resetChats: () => set({ chats: [] }),
+  setChats: (newChats: Chat[]) =>
+    set((state: { chats: Chat[] }) => {
+      const updatedChats = [...state.chats, ...newChats];
+      const uniqueChats = Array.from(
+        new Set(updatedChats.map((chat) => chat.created_at)) // Set ensures uniqueness based on 'created_at'
+      )
+        .map(
+          (created_at) =>
+            updatedChats.find((chat) => chat.created_at === created_at) // Find the unique chats based on 'created_at'
+        )
+        .filter((chat): chat is Chat => chat !== undefined); // Filter out undefined values
+
+      return { chats: uniqueChats };
+    }),
+
+  chatItemHis: [],
+  setChatItemHis: (itemHis: HistoryType) =>
+    set((state) => ({ chatItemHis: [...state.chatItemHis, itemHis] })),
+
+  fetchChatItemHis: (itemHis: HistoryType[]) =>
+    set(() => ({ chatItemHis: itemHis })),
+
+  searchStream: "",
+  setSearchStream: (value) => set(() => ({ searchStream: value })),
+
+  streamData: "",
+  setStreamData: (newData) => set({ streamData: newData }),
+
+  editorInstance: null,
+  setEditorInstance: (editor) => set({ editorInstance: editor }),
+
+  chatStarted: false,
+  setChatStarted: (chatStarted: boolean) => set({ chatStarted }),
 }));
 
 export default useChatStore;

@@ -1,7 +1,13 @@
-import { CheckCheck, RefreshCcwDot, BarChartBig } from "lucide-react";
+import {
+  CheckCheck,
+  RefreshCcwDot,
+  BarChartBig,
+  Undo2Icon,
+  Redo2Icon,
+} from "lucide-react";
 import { useEditor } from "novel";
 import { CommandGroup, CommandItem } from "../ui/command";
-
+// zap
 const options = [
   {
     value: "IMPROVE",
@@ -34,7 +40,14 @@ const AISelectorCommands = ({ onSelect }: AISelectorCommandsProps) => {
         {options.map((option) => (
           <CommandItem
             onSelect={(value) => {
-              const selectedText = editor?.state.selection.content().content.textBetween(0, editor?.state.selection.content().content.size, "\n") || "";
+              const selectedText =
+                editor?.state.selection
+                  .content()
+                  .content.textBetween(
+                    0,
+                    editor?.state.selection.content().content.size,
+                    "\n"
+                  ) || "";
               onSelect(selectedText, value);
             }}
             className="flex gap-2 px-4 cursor-pointer"

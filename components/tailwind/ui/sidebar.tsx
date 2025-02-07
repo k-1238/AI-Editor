@@ -59,7 +59,6 @@ export default function Sidebar({ open }: SidebarProps) {
         }
       );
       const { next_cursor, has_next, chats } = res.data;
-
       // Append new chats
       if (chats.length === 0 && !next_cursor) {
         setHasNext(false);

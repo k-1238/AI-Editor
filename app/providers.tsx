@@ -55,20 +55,18 @@ export default function Providers({ children }: { children: ReactNode }) {
         attribute="class"
         enableSystem
         disableTransitionOnChange
-        defaultTheme="system"
-      >
-          <SessionUUIDContext.Provider value={{ sessionUUID, setSessionId }}>
-            <AppContext.Provider
-              value={{
-                font,
-                setFont,
-              }}
-            >
-              <ToasterProvider />
-              {children}
-              <Analytics />
-            </AppContext.Provider>
-          </SessionUUIDContext.Provider>
+        defaultTheme="dark">
+        <SessionUUIDContext.Provider value={{ sessionUUID, setSessionId }}>
+          <AppContext.Provider
+            value={{
+              font,
+              setFont,
+            }}>
+            <ToasterProvider />
+            {children}
+            <Analytics />
+          </AppContext.Provider>
+        </SessionUUIDContext.Provider>
       </ThemeProvider>
     </SessionProvider>
   );
