@@ -118,7 +118,7 @@ export default function Page() {
           {/* Editor & Chat */}
           <div
             className={`flex flex-1 mt-5 shadow-md ${
-              chatStarted ? "h-[85vh]" : "h-[70vh]"
+              chatStarted ? "h-[85vh]" : "h-[64vh]"
             }`}>
             <TailwindAdvancedEditor />
           </div>
@@ -140,7 +140,7 @@ export default function Page() {
             onOpenChange={() => setIsOpenChatBox(false)}>
             <SheetContent
               side={"bottom"}
-              className="max-h-[90vh] overflow-auto">
+              className="h-[90vh] overflow-auto">
               <ChatBox />
             </SheetContent>
           </Sheet>

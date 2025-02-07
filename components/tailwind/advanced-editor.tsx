@@ -108,6 +108,10 @@ const TailwindAdvancedEditor = () => {
           }>
           {charsCount} Words
         </div>
+        <div
+          className="rounded-lg bg-accent px-2 py-1 text-sm text-muted-foreground">
+          Export
+        </div>
       </div>
       <EditorRoot>
         <EditorContent
