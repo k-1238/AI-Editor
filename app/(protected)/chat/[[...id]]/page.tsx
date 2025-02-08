@@ -65,8 +65,7 @@ export default function Page() {
         className={`flex transition-all duration-700 flex-col flex-1 items-center gap-4 py-4 sm:px-5 ${
           chatStarted ? "lg:w-3/5" : "lg:w-full"
         }`}>
-        <div
-          className={`flex w-full items-center gap-2 px-4`}>
+        <div className={`flex w-full items-center gap-2 px-4`}>
           <PanelRight
             className="lg:hidden cursor-pointer"
             onClick={() => setOpen(!open)} // Toggle Sidebar visibility on click
@@ -106,7 +105,7 @@ export default function Page() {
                   />
                 </svg>
               </div>
-              <h1 className="text-2xl font-semibold">
+              <h1 className="text-2xl font-semibold mt-4">
                 Welcome To Our AI Power Editor
               </h1>
               <p className="text-blue-400 mt-2 text-lg">AI Power Editor</p>
@@ -136,9 +135,7 @@ export default function Page() {
           <Sheet
             open={isOpenChatBox}
             onOpenChange={() => setIsOpenChatBox(false)}>
-            <SheetContent
-              side={"bottom"}
-              className="h-[90vh] overflow-auto">
+            <SheetContent side={"bottom"} className="h-[90vh] overflow-auto">
               <ChatBox />
             </SheetContent>
           </Sheet>
