@@ -66,9 +66,7 @@ export default function Page() {
           chatStarted ? "lg:w-3/5" : "lg:w-full"
         }`}>
         <div
-          className={`flex w-full items-center gap-2 px-4 ${
-            !chatStarted && "sm:mb-[calc(5vh)]"
-          }`}>
+          className={`flex w-full items-center gap-2 px-4`}>
           <PanelRight
             className="lg:hidden cursor-pointer"
             onClick={() => setOpen(!open)} // Toggle Sidebar visibility on click
@@ -92,7 +90,7 @@ export default function Page() {
           }`}>
           {/* Welcome Board */}
           {!chatStarted && (
-            <div className="flex flex-col items-center text-center mt-8">
+            <div className="flex flex-col items-center text-center mt-3">
               <div className="w-12 h-12 flex items-center justify-center dark:bg-gray-800 bg-cyan-300 rounded-full">
                 <svg
                   className="w-6 h-6 text-blue-400"
