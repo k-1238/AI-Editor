@@ -92,7 +92,7 @@ export function AISelector({ onOpenChange }: AISelectorProps) {
         const chunk = decoder.decode(value);
         output += chunk;
         if (selectedOption !== null && selectedOption !== "") {
-          if (selectedOption === "zap") {
+          if (selectedOption === "zap" || selectedOption === "improve") {
             updateLastAiMsg(aiMsgId, chunk);
           } else {
             if (selectedOption !== "chart") {
@@ -139,7 +139,7 @@ export function AISelector({ onOpenChange }: AISelectorProps) {
             session_id: sessionUUID, // session_id
             collectedMsg: output, // ai response
           };
-          // handleSaveChat(data);
+          handleSaveChat(data);
         }
       }
 
