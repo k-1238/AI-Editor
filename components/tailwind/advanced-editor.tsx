@@ -6,7 +6,7 @@ import {
   JSONContent,
 } from "novel";
 import { ImageResizer, handleCommandNavigation } from "novel/extensions";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import { defaultExtensions } from "./extensions";
 import GenerativeMenuSwitch from "./generative/generative-menu-switch";
@@ -19,8 +19,9 @@ import { NodeSelector } from "./selectors/node-selector";
 import { LinkSelector } from "./selectors/link-selector";
 import { TextButtons } from "./selectors/text-buttons";
 import { ColorSelector } from "./selectors/color-selector";
-import { Button } from "./ui/button";
+import html2canvas from 'html2canvas';
 import useChatStore from "@/hooks/chatStore";
+import { jsPDF } from "jspdf";
 
 const extensions = [...defaultExtensions, ChartExtension];
 
@@ -55,6 +56,45 @@ const TailwindAdvancedEditor = () => {
       }
     }
   };
+  const exportToPDF = async () => {
+    const editorElement = document.querySelector(".tiptap");
+    if (!editorElement) {
+      console.error('Editor content element not found');
+      return;
+    }
+
+    try {
+      const canvas = await html2canvas(editorElement, {
+        scrollY: -window.scrollY,
+        height: editorElement.scrollHeight
+      });
+      const imgData = canvas.toDataURL('image/png');
+      
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const imgProps = pdf.getImageProperties(imgData);
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+      
+      let heightLeft = pdfHeight;
+      let position = 0;
+
+      pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
+      heightLeft -= pdf.internal.pageSize.getHeight();
+
+      while (heightLeft >= 0) {
+        position = heightLeft - pdfHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
+        heightLeft -= pdf.internal.pageSize.getHeight();
+      }
+
+      pdf.save("novel-editor-export.pdf");
+    } catch (error) {
+      console.error('Error exporting to PDF:', error);
+    }
+  };
+
+
   // useEffect(() => {
   //   if (streamData) {
   //     if (editorInstance) {
@@ -109,7 +149,7 @@ const TailwindAdvancedEditor = () => {
           {charsCount} Words
         </div>
         <div
-          className="rounded-lg bg-accent px-2 py-1 text-sm text-muted-foreground">
+          className="rounded-lg bg-accent px-2 py-1 text-sm text-muted-foreground cursor-pointer" onClick={() => { exportToPDF() }}>
           Export
         </div>
       </div>
@@ -117,7 +157,7 @@ const TailwindAdvancedEditor = () => {
         <EditorContent
           initialContent={initialContent}
           extensions={extensions}
-          className="relative h-full min-h-full overflow-auto flex flex-col w-full border-muted bg-background sm:border sm:shadow-lg"
+          className="relative h-full min-h-full novel-tiptap-editor overflow-auto flex flex-col w-full border-muted bg-background sm:border sm:shadow-lg"
           editorProps={{
             handleDOMEvents: {
               keydown: (_view, event) => handleCommandNavigation(event),
