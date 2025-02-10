@@ -156,7 +156,7 @@ export function AISelector({ onOpenChange }: AISelectorProps) {
 
   useEffect(() => {
     if (selectedOption && selectedValue !== "" && sessionUUID) {
-      if (selectedOption === "zap") {
+      if (selectedOption === "zap" || selectedOption === "improve") {
         setChatStarted(true);
         addMsg({ id: uuidv4(), role: "user", content: selectedValue });
       }
