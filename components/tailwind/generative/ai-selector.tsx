@@ -99,7 +99,10 @@ export function AISelector({ onOpenChange }: AISelectorProps) {
               if (editor) {
                 const { from, to } = editor.state.selection;
                 editor.commands.setTextSelection({ from, to });
-                editor.chain().focus().setColor('#60a5fa')
+                editor
+                  .chain()
+                  .focus()
+                  .setColor("#60a5fa")
                   .insertContent(chunk)
                   .run();
               }
@@ -148,7 +151,7 @@ export function AISelector({ onOpenChange }: AISelectorProps) {
     onFinish: () => {
       complete("");
     },
-    onError: (e) => { },
+    onError: (e) => {},
   });
 
   useEffect(() => {
