@@ -6,7 +6,7 @@ import {
   JSONContent,
 } from "novel";
 import { ImageResizer, handleCommandNavigation } from "novel/extensions";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import { defaultExtensions } from "./extensions";
 import GenerativeMenuSwitch from "./generative/generative-menu-switch";
@@ -57,7 +57,7 @@ const TailwindAdvancedEditor = () => {
     }
   };
   const exportToPDF = async () => {
-    const editorElement = document.querySelector(".tiptap");
+    const editorElement:any = document.querySelector(".tiptap");
     if (!editorElement) {
       console.error('Editor content element not found');
       return;
