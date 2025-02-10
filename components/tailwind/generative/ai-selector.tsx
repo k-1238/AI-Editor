@@ -77,7 +77,7 @@ export function AISelector({ onOpenChange }: AISelectorProps) {
       let output = "";
       const aiMsgId = uuidv4();
       const decoder = new TextDecoder();
-      if (selectedOption === "zap") {
+      if (selectedOption === "zap" || selectedOption === "improve") {
         addMsg({ id: aiMsgId, role: "ai", content: "" });
       }
       setIsEditing(true);
