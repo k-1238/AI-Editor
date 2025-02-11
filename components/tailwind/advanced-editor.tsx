@@ -22,8 +22,9 @@ import { ColorSelector } from "./selectors/color-selector";
 import html2canvas from 'html2canvas';
 import useChatStore from "@/hooks/chatStore";
 import { jsPDF } from "jspdf";
+import { ReadingLevelExtension } from "./ui/ReadingLevelExtension";
 
-const extensions = [...defaultExtensions, ChartExtension];
+const extensions = [...defaultExtensions, ChartExtension, ReadingLevelExtension];
 
 const TailwindAdvancedEditor = () => {
   const [initialContent, setInitialContent] = useState<null | JSONContent>(
@@ -36,9 +37,11 @@ const TailwindAdvancedEditor = () => {
   const [openNode, setOpenNode] = useState(false);
   const [openColor, setOpenColor] = useState(false);
   const [openLink, setOpenLink] = useState(false);
-  const { editorInstance, setEditorInstance, setChatStarted } = useChatStore();
+  const [level, setLevel] = useState(0);
+  const { editorInstance, setEditorInstance, setChatStarted, clearChatMsgs } = useChatStore();
   const debouncedUpdates = useDebouncedCallback(
     async (editor: EditorInstance) => {
+      setLevel(editor.storage.readingLevel.level);
       // Extract chart data from the editor content
       setCharsCount(editor.storage.characterCount.words());
       setSaveStatus("Saved");
@@ -48,6 +51,7 @@ const TailwindAdvancedEditor = () => {
   const makeNewChat = () => {
     setChatStarted(false);
     setSessionId();
+    clearChatMsgs()
     if (editorInstance) {
       if (editorInstance.getText() !== "") {
         editorInstance.commands.clearContent();
@@ -147,6 +151,10 @@ const TailwindAdvancedEditor = () => {
               : "hidden"
           }>
           {charsCount} Words
+        </div>
+        <div
+          className="rounded-lg bg-accent px-2 py-1 text-sm text-muted-foreground">
+          {level} Reading Level
         </div>
         <div
           className="rounded-lg bg-accent px-2 py-1 text-sm text-muted-foreground cursor-pointer" onClick={() => { exportToPDF() }}>

@@ -5,6 +5,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/tailwind/ui/dialog";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import HistoryItem from "../ui/historyItem";
 import { Button } from "../ui/button";
 import { Chat } from "../ui/sidebar";
@@ -71,7 +72,7 @@ const ChatItemModel = ({ chat, isActive, setIsActive }: ChatItemModelProps) => {
         </Button>
       </DialogTrigger>
       <DialogContent className="flex max-w-3xl items-center flex-col h-[calc(70vh-24px)]">
-        <DialogTitle>This is a Chat History</DialogTitle>
+        <DialogTitle><VisuallyHidden>This is a Chat History</VisuallyHidden></DialogTitle>
         {isFetching ? (
           <div className="w-full flex justify-center items-center h-[inherit]">
             <LucideLoader

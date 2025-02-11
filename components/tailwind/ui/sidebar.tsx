@@ -12,6 +12,7 @@ import useChatStore from "@/hooks/chatStore";
 import { getSession } from "next-auth/react";
 import ChatItemModel from "../generative/chat-item-model";
 import { toast } from "sonner";
+import ProposeChat from "./proposeChat";
 
 export type Chat = {
   created_at: string;
@@ -42,41 +43,41 @@ export default function Sidebar({ open }: SidebarProps) {
   const [cursor, setCursor] = useState<string | null>("");
   const observerRef = useRef<HTMLDivElement>(null);
   const [hasNext, setHasNext] = useState(false);
-  const { chats, setChats, searchStream } = useChatStore();
+  const { chats, setChats, searchStream, chatStarted } = useChatStore();
   const [isActive, setIsActive] = useState<string>("");
   const handlePaginate = useCallback(async () => {
-    if (isLoading) return; // Prevent fetching if loading or cursor is null
-    setIsLoading(true);
-    const session = await getSession();
-    try {
-      const res = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/get_first_chats/`,
-        {
-          params: {
-            cursor,
-            user_id: (session?.user as Record<string, any>)?.user_id,
-          },
-        }
-      );
-      const { next_cursor, has_next, chats } = res.data;
-      // Append new chats
-      if (chats.length === 0 && !next_cursor) {
-        setHasNext(false);
-        setIsLoading(false);
-        setCursor(next_cursor);
-      } else {
-        setChats(res.data.chats);
-        setCursor(next_cursor);
-        setHasNext(has_next);
-      }
-    } catch (error) {
-      setHasNext(false);
-      setIsLoading(false);
-      setCursor(null);
-      toast.error("Error fetching chats");
-    } finally {
-      setIsLoading(false);
-    }
+    // if (isLoading) return; // Prevent fetching if loading or cursor is null
+    // setIsLoading(true);
+    // const session = await getSession();
+    // try {
+    //   const res = await axios.get(
+    //     `${process.env.NEXT_PUBLIC_API_URL}/api/get_first_chats/`,
+    //     {
+    //       params: {
+    //         cursor,
+    //         user_id: (session?.user as Record<string, any>)?.user_id,
+    //       },
+    //     }
+    //   );
+    //   const { next_cursor, has_next, chats } = res.data;
+    //   // Append new chats
+    //   if (chats.length === 0 && !next_cursor) {
+    //     setHasNext(false);
+    //     setIsLoading(false);
+    //     setCursor(next_cursor);
+    //   } else {
+    //     setChats(res.data.chats);
+    //     setCursor(next_cursor);
+    //     setHasNext(has_next);
+    //   }
+    // } catch (error) {
+    //   setHasNext(false);
+    //   setIsLoading(false);
+    //   setCursor(null);
+    //   toast.error("Error fetching chats");
+    // } finally {
+    //   setIsLoading(false);
+    // }
   }, [setChats, setCursor, isLoading, setHasNext]);
 
   const handleObserver = useCallback(
@@ -120,16 +121,16 @@ export default function Sidebar({ open }: SidebarProps) {
   }, [chats, searchStream]);
   return (
     <div
-      className={`h-screen sm:min-w-[289px] ${
-        !open && "max-sm:!w-0 border-r-2"
-      }  overflow-x-hidden flex flex-col`}>
-      <div className="flex flex-row items-center justify-between px-5 py-7">
-        <Sparkles className="h-15 w-15" size={40} />
-        <div className="flex justify-start mx-2">
+    className={`h-full sm:min-w-[289px] ${
+      !open && "max-sm:!w-0 border-r-2"
+    }  overflow-x-hidden flex flex-col`}>
+      <div className="flex flex-row py-5 px-2">
+        <Sparkles className="h-15 w-15 text-[#9f00d9]" size={40} />
+        <div className="flex ml-4 w-full">
           <Search />
         </div>
       </div>
-      <div className="w-full flex-grow overflow-y-auto space-y-2">
+      <div className="w-full h-[78vh] flex-grow overflow-y-auto space-y-2">
         {getFilteredChats.length > 0 &&
           getFilteredChats.map((chat: Chat, index: number) => (
             <ChatItemModel
@@ -155,8 +156,8 @@ export default function Sidebar({ open }: SidebarProps) {
         )}
         {hasNext && <div ref={observerRef} />}
       </div>
-      <div className="flex items-center mt-auto justify-center border-t-2 border-b-2 px-5 py-7">
-        Upgrade Version
+      <div className="flex items-center justify-center py-4 px-2">
+        {!chatStarted && (<ProposeChat />)}
       </div>
     </div>
   );

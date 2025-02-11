@@ -1,10 +1,11 @@
 "use client";
 import { ScrollArea } from "./scroll-area";
-import { BotIcon, UserCircleIcon } from "lucide-react";
+import { UserCircleIcon } from "lucide-react";
+import { RiSparkling2Line } from "react-icons/ri";
 import useChatStore from "@/hooks/chatStore";
 import ReactMarkdown from "react-markdown";
 const ChatBox = () => {
-  const { chatMsgs, isEditing } = useChatStore();
+  const { chatMsgs } = useChatStore();
 
   return (
     <ScrollArea className="w-full px-3">
@@ -31,11 +32,11 @@ const ChatBox = () => {
             {/* Bot Message (Left) */}
             {item.role === "ai" && (
               <div className="flex justify-start items-center mb-4">
-                <BotIcon
+                <RiSparkling2Line
                   size={24}
-                  className="w-6 h-6 flex-shrink-0 text-gray-600"
+                  className="w-6 h-6 flex-shrink-0 text-[#9f00d9] mb-auto mt-4"
                 />
-                <div className="ml-2 py-3 px-4 bg-gray-400 rounded-br-3xl rounded-tr-3xl rounded-tl-xl text-white">
+                <div className="ml-2 py-3 px-4 rounded-br-3xl rounded-tr-3xl rounded-tl-xl ">
                   <ScrollArea>
                     <ReactMarkdown>{item.content}</ReactMarkdown>
                   </ScrollArea>

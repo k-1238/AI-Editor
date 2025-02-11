@@ -13,6 +13,7 @@ import useChatStore from "@/hooks/chatStore";
 import ChatBox from "@/components/tailwind/ui/chatBox";
 import { CanvasLoading } from "@/components/Common/CanvasLoading";
 import { LuArrowUpNarrowWide } from "react-icons/lu";
+import ProposeChat from "@/components/tailwind/ui/proposeChat";
 
 export default function Page() {
   const [open, setOpen] = useState(false);
@@ -31,10 +32,10 @@ export default function Page() {
   }, [chatStarted]);
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth >= 640) {
-        // This assumes desktop starts at 1024px
-        setOpen(false); // Automatically close on desktop
-      }
+      // if (window.innerWidth >= 768) {
+      //   // This assumes desktop starts at 1024px
+      //   setOpen(false); // Automatically close on desktop
+      // }
       if (window.innerWidth >= 1024) setIsOpenChatBox(false);
     };
 
@@ -49,9 +50,8 @@ export default function Page() {
     <div className="flex flex-row h-screen">
       {/* Sidebar Component */}
       <div
-        className={`transition-all duration-300 ${
-          chatStarted ? "sm:-ml-[289px]" : "ml-0"
-        }`}>
+        className={`transition-all duration-300 ${chatStarted ? "sm:-ml-[289px]" : "ml-0"
+          }`}>
         <Sidebar />
       </div>
 
@@ -62,13 +62,12 @@ export default function Page() {
       </Sheet>
       {/* Main Content */}
       <div
-        className={`flex transition-all duration-700 flex-col flex-1 items-center gap-4 py-4 sm:px-5 ${
-          chatStarted ? "lg:w-3/5" : "lg:w-full"
-        }`}>
+        className={`flex transition-all duration-700 flex-col flex-1 items-center gap-4 py-4 sm:px-5 ${chatStarted ? "lg:w-3/5" : "lg:w-full"
+          }`}>
         <div className={`flex w-full items-center gap-2 px-4`}>
           <PanelRight
-            className="lg:hidden cursor-pointer"
-            onClick={() => setOpen(!open)} // Toggle Sidebar visibility on click
+            className={`${!chatStarted && "sm:hidden"} cursor-pointer`}
+            onClick={() => { setOpen(!open) }} // Toggle Sidebar visibility on click
           />
           <Tooltip content="Logout" className="text-sm">
             <Button
@@ -84,9 +83,8 @@ export default function Page() {
         </div>
 
         <div
-          className={`w-full py-5 flex flex-col ${
-            chatStarted && "justify-between"
-          }`}>
+          className={`w-full py-5 flex flex-col ${chatStarted && "justify-between"
+            }`}>
           {/* Welcome Board */}
           {!chatStarted && (
             <div className="flex flex-col items-center text-center mt-3">
@@ -114,9 +112,8 @@ export default function Page() {
 
           {/* Editor & Chat */}
           <div
-            className={`flex flex-1 mt-5 shadow-md ${
-              chatStarted ? "h-[85vh]" : "h-[64vh]"
-            }`}>
+            className={`flex flex-1 mt-5 shadow-md ${chatStarted ? "h-[85vh]" : "h-[64vh]"
+              }`}>
             <TailwindAdvancedEditor />
           </div>
         </div>
@@ -129,7 +126,10 @@ export default function Page() {
                 <CanvasLoading />
               </div>
             ) : (
-              <ChatBox />
+              <div className="flex flex-col">
+                <ChatBox />
+                <ProposeChat className="mt-auto mb-3 px-2" />
+              </div>
             )}
           </div>
           <Sheet
@@ -137,9 +137,10 @@ export default function Page() {
             onOpenChange={() => setIsOpenChatBox(false)}>
             <SheetContent side={"bottom"} className="h-[90vh] overflow-auto">
               <ChatBox />
+              <ProposeChat className="mt-auto mb-3 px-2" />
             </SheetContent>
           </Sheet>
-          <div className="absolute bottom-3 left-1/2 lg:hidden -lg flex size-10 animate-bounce items-center justify-center rounded-full bg-white p-2 ring-1 ring-gray-900/5 dark:bg-white/5 dark:ring-white/20">
+          <div className="absolute bottom-3 left-1/2 lg:hidden -lg flex size-10 animate-bounce items-center justify-center rounded-full bg-white p-2 ring-1 ring-gray-900/5 dark:bg-[#9f00d9] dark:ring-white/20">
             <Tooltip content="Chat" className="text-sm">
               <LuArrowUpNarrowWide
                 color="blue"

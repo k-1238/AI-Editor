@@ -74,7 +74,7 @@ interface chatStore {
   chatMsgs: ChatMessage[];
   addMsg: (message: ChatMessage) => void;
   updateLastAiMsg: (id: string, newContent: string) => void;
-
+  clearChatMsgs: () => void;
   // add chat item in sidebar for pagination
   chats: Chat[];
   addChat: (item: Chat) => void; // add chat when we start conversation with ai
@@ -116,6 +116,8 @@ const useChatStore = create<chatStore>((set) => ({
         msg.id === id ? { ...msg, content: msg.content + newContent } : msg
       ),
     })),
+
+  clearChatMsgs: () => set({ chatMsgs: [] }),
 
   chats: [],
   addChat: (item: Chat) =>
