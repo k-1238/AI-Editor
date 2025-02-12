@@ -46,38 +46,38 @@ export default function Sidebar({ open }: SidebarProps) {
   const { chats, setChats, searchStream, chatStarted } = useChatStore();
   const [isActive, setIsActive] = useState<string>("");
   const handlePaginate = useCallback(async () => {
-    // if (isLoading) return; // Prevent fetching if loading or cursor is null
-    // setIsLoading(true);
-    // const session = await getSession();
-    // try {
-    //   const res = await axios.get(
-    //     `${process.env.NEXT_PUBLIC_API_URL}/api/get_first_chats/`,
-    //     {
-    //       params: {
-    //         cursor,
-    //         user_id: (session?.user as Record<string, any>)?.user_id,
-    //       },
-    //     }
-    //   );
-    //   const { next_cursor, has_next, chats } = res.data;
-    //   // Append new chats
-    //   if (chats.length === 0 && !next_cursor) {
-    //     setHasNext(false);
-    //     setIsLoading(false);
-    //     setCursor(next_cursor);
-    //   } else {
-    //     setChats(res.data.chats);
-    //     setCursor(next_cursor);
-    //     setHasNext(has_next);
-    //   }
-    // } catch (error) {
-    //   setHasNext(false);
-    //   setIsLoading(false);
-    //   setCursor(null);
-    //   toast.error("Error fetching chats");
-    // } finally {
-    //   setIsLoading(false);
-    // }
+    if (isLoading) return; // Prevent fetching if loading or cursor is null
+    setIsLoading(true);
+    const session = await getSession();
+    try {
+      const res = await axios.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/get_first_chats/`,
+        {
+          params: {
+            cursor,
+            user_id: (session?.user as Record<string, any>)?.user_id,
+          },
+        }
+      );
+      const { next_cursor, has_next, chats } = res.data;
+      // Append new chats
+      if (chats.length === 0 && !next_cursor) {
+        setHasNext(false);
+        setIsLoading(false);
+        setCursor(next_cursor);
+      } else {
+        setChats(res.data.chats);
+        setCursor(next_cursor);
+        setHasNext(has_next);
+      }
+    } catch (error) {
+      setHasNext(false);
+      setIsLoading(false);
+      setCursor(null);
+      toast.error("Error fetching chats");
+    } finally {
+      setIsLoading(false);
+    }
   }, [setChats, setCursor, isLoading, setHasNext]);
 
   const handleObserver = useCallback(

@@ -97,15 +97,7 @@ const TailwindAdvancedEditor = () => {
       console.error('Error exporting to PDF:', error);
     }
   };
-
-
-  // useEffect(() => {
-  //   if (streamData) {
-  //     if (editorInstance) {
-  //       editorInstance.commands.insertContent(streamData);
-  //     }
-  //   }
-  // }, [streamData]);
+  
   useEffect(() => {
     setInitialContent(defaultEditorContent);
   }, []);

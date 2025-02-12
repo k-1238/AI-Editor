@@ -142,7 +142,7 @@ export function AISelector({ onOpenChange }: AISelectorProps) {
             session_id: sessionUUID, // session_id
             collectedMsg: output, // ai response
           };
-          // handleSaveChat(data);
+          handleSaveChat(data);
         }
       }
 
