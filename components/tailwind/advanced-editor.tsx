@@ -19,12 +19,16 @@ import { NodeSelector } from "./selectors/node-selector";
 import { LinkSelector } from "./selectors/link-selector";
 import { TextButtons } from "./selectors/text-buttons";
 import { ColorSelector } from "./selectors/color-selector";
-import html2canvas from 'html2canvas';
+import html2canvas from "html2canvas";
 import useChatStore from "@/hooks/chatStore";
 import { jsPDF } from "jspdf";
 import { ReadingLevelExtension } from "./extensions/ReadingLevelExtension";
 
-const extensions = [...defaultExtensions, ChartExtension, ReadingLevelExtension];
+const extensions = [
+  ...defaultExtensions,
+  ChartExtension,
+  ReadingLevelExtension,
+];
 
 const TailwindAdvancedEditor = () => {
   const [initialContent, setInitialContent] = useState<null | JSONContent>(
@@ -38,7 +42,8 @@ const TailwindAdvancedEditor = () => {
   const [openColor, setOpenColor] = useState(false);
   const [openLink, setOpenLink] = useState(false);
   const [level, setLevel] = useState(0);
-  const { editorInstance, setEditorInstance, setChatStarted, clearChatMsgs } = useChatStore();
+  const { editorInstance, setEditorInstance, setChatStarted, clearChatMsgs } =
+    useChatStore();
   const debouncedUpdates = useDebouncedCallback(
     async (editor: EditorInstance) => {
       setLevel(editor.storage.readingLevel.level);
@@ -51,7 +56,7 @@ const TailwindAdvancedEditor = () => {
   const makeNewChat = () => {
     setChatStarted(false);
     setSessionId();
-    clearChatMsgs()
+    clearChatMsgs();
     if (editorInstance) {
       if (editorInstance.getText() !== "") {
         editorInstance.commands.clearContent();
@@ -63,18 +68,18 @@ const TailwindAdvancedEditor = () => {
   const exportToPDF = async () => {
     const editorElement: any = document.querySelector(".tiptap");
     if (!editorElement) {
-      console.error('Editor content element not found');
+      console.error("Editor content element not found");
       return;
     }
 
     try {
       const canvas = await html2canvas(editorElement, {
         scrollY: -window.scrollY,
-        height: editorElement.scrollHeight
+        height: editorElement.scrollHeight,
       });
-      const imgData = canvas.toDataURL('image/png');
+      const imgData = canvas.toDataURL("image/png");
 
-      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pdf = new jsPDF("p", "mm", "a4");
       const imgProps = pdf.getImageProperties(imgData);
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
@@ -82,19 +87,19 @@ const TailwindAdvancedEditor = () => {
       let heightLeft = pdfHeight;
       let position = 0;
 
-      pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
+      pdf.addImage(imgData, "PNG", 0, position, pdfWidth, pdfHeight);
       heightLeft -= pdf.internal.pageSize.getHeight();
 
       while (heightLeft >= 0) {
         position = heightLeft - pdfHeight;
         pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
+        pdf.addImage(imgData, "PNG", 0, position, pdfWidth, pdfHeight);
         heightLeft -= pdf.internal.pageSize.getHeight();
       }
 
       pdf.save("novel-editor-export.pdf");
     } catch (error) {
-      console.error('Error exporting to PDF:', error);
+      console.error("Error exporting to PDF:", error);
     }
   };
 
@@ -144,12 +149,14 @@ const TailwindAdvancedEditor = () => {
           }>
           {charsCount} Words
         </div>
-        <div
-          className="rounded-lg bg-accent px-2 py-1 text-sm text-muted-foreground">
+        <div className="rounded-lg bg-accent px-2 py-1 text-sm text-muted-foreground">
           {level} Reading Level
         </div>
         <div
-          className="rounded-lg bg-accent px-2 py-1 text-sm text-muted-foreground cursor-pointer" onClick={() => { exportToPDF() }}>
+          className="rounded-lg bg-accent px-2 py-1 text-sm text-muted-foreground cursor-pointer"
+          onClick={() => {
+            exportToPDF();
+          }}>
           Export
         </div>
       </div>

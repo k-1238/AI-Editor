@@ -28,11 +28,7 @@ ChartJS.register(
   zoomPlugin
 );
 
-const optionsChart = [
-  "Bar",
-  "Line",
-  "Pie"
-]
+const optionsChart = ["Bar", "Line", "Pie"];
 
 const GenerateChart = ({ node }: any) => {
   const chartData = node.attrs.data;
@@ -96,7 +92,7 @@ const GenerateChart = ({ node }: any) => {
       },
     },
   };
-  
+
   useEffect(() => {
     const generateChart = () => {
       const randomIdx = Math.floor(Math.random() * optionsChart.length);
@@ -118,9 +114,7 @@ const GenerateChart = ({ node }: any) => {
   }, [chartData]); // Run effect only when chartData changes
   return (
     <NodeViewWrapper>
-      <div className="flex items-center gap-2">
-        {randomChart}
-      </div>
+      <div className="flex w-full items-center gap-2">{randomChart}</div>
     </NodeViewWrapper>
   );
 };

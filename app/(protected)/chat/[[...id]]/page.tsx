@@ -51,8 +51,9 @@ export default function Page() {
     <div className="flex flex-row h-screen">
       {/* Sidebar Component */}
       <div
-        className={`transition-all duration-300 ${chatStarted ? "sm:-ml-[289px]" : "ml-0"
-          }`}>
+        className={`transition-all duration-300 ${
+          chatStarted ? "sm:-ml-[289px]" : "ml-0"
+        }`}>
         <Sidebar />
       </div>
 
@@ -63,12 +64,15 @@ export default function Page() {
       </Sheet>
       {/* Main Content */}
       <div
-        className={`flex transition-all duration-700 flex-col flex-1 items-center gap-4 py-4 sm:px-5 ${chatStarted ? "lg:w-3/5" : "lg:w-full"
-          }`}>
+        className={`flex transition-all duration-700 flex-col flex-1 items-center gap-4 py-4 sm:px-5 ${
+          chatStarted ? "lg:w-3/5" : "lg:w-full"
+        }`}>
         <div className={`flex w-full items-center gap-2 px-4`}>
           <PanelRight
             className={`${!chatStarted && "sm:hidden"} cursor-pointer`}
-            onClick={() => { setOpen(!open) }} // Toggle Sidebar visibility on click
+            onClick={() => {
+              setOpen(!open);
+            }} // Toggle Sidebar visibility on click
           />
           <Tooltip content="Logout" className="text-sm">
             <Button
@@ -84,8 +88,9 @@ export default function Page() {
         </div>
 
         <div
-          className={`w-full py-5 flex flex-col ${chatStarted && "justify-between"
-            }`}>
+          className={`w-full py-5 flex flex-col ${
+            chatStarted && "justify-between"
+          }`}>
           {/* Welcome Board */}
           {!chatStarted && (
             <div className="flex flex-col items-center text-center mt-3">
@@ -101,8 +106,9 @@ export default function Page() {
 
           {/* Editor & Chat */}
           <div
-            className={`flex flex-1 mt-5 shadow-md ${chatStarted ? "h-[85vh]" : "h-[64vh]"
-              }`}>
+            className={`flex flex-1 mt-5 shadow-md ${
+              chatStarted ? "h-[85vh]" : "h-[64vh]"
+            }`}>
             <TailwindAdvancedEditor />
           </div>
         </div>

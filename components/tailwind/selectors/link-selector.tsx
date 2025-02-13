@@ -42,13 +42,15 @@ export const LinkSelector = ({ open, onOpenChange }: LinkSelectorProps) => {
   return (
     <Popover modal={true} open={open} onOpenChange={onOpenChange}>
       <PopoverTrigger asChild>
-        <Button size="sm" variant="ghost" className="gap-2 rounded-none border-none">
+        <Button
+          size="sm"
+          variant="ghost"
+          className="gap-2 rounded-none border-none">
           <p className="text-base">↗</p>
           <p
             className={cn("underline decoration-stone-400 underline-offset-4", {
               "text-blue-500": editor.isActive("link"),
-            })}
-          >
+            })}>
             Link
           </p>
         </Button>
@@ -65,8 +67,7 @@ export const LinkSelector = ({ open, onOpenChange }: LinkSelectorProps) => {
               onOpenChange(false);
             }
           }}
-          className="flex  p-1 "
-        >
+          className="flex  p-1 ">
           <input
             ref={inputRef}
             type="text"
@@ -82,10 +83,9 @@ export const LinkSelector = ({ open, onOpenChange }: LinkSelectorProps) => {
               className="flex h-8 items-center rounded-sm p-1 text-red-600 transition-all hover:bg-red-100 dark:hover:bg-red-800"
               onClick={() => {
                 editor.chain().focus().unsetLink().run();
-                inputRef.current.value = "";
+                inputRef.current && (inputRef.current.value = "");
                 onOpenChange(false);
-              }}
-            >
+              }}>
               <Trash className="h-4 w-4" />
             </Button>
           ) : (
