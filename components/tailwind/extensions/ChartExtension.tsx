@@ -2,7 +2,7 @@
 import { Node, mergeAttributes } from "@tiptap/core";
 import { ReactNodeViewRenderer } from "@tiptap/react";
 import dynamic from "next/dynamic";
-const GenerateChart = dynamic(() => import("./generate-chart"), {
+const GenerateChart = dynamic(() => import("../ui/generate-chart"), {
   ssr: false,
 });
 

@@ -14,6 +14,7 @@ import {
 import zoomPlugin from "chartjs-plugin-zoom";
 import { Bar, Line, Pie } from "react-chartjs-2";
 import { Mode } from "chartjs-plugin-zoom/types/options";
+import { useEffect, useState } from "react";
 ChartJS.register(
   BarElement,
   CategoryScale,
@@ -27,8 +28,15 @@ ChartJS.register(
   zoomPlugin
 );
 
+const optionsChart = [
+  "Bar",
+  "Line",
+  "Pie"
+]
+
 const GenerateChart = ({ node }: any) => {
   const chartData = node.attrs.data;
+  const [randomChart, setRandomChart] = useState<JSX.Element | null>(null);
   const aggregateData = (data: number[], interval: number) => {
     return data.reduce((acc, value, index) => {
       if (index % interval === 0) {
@@ -37,6 +45,7 @@ const GenerateChart = ({ node }: any) => {
       return acc;
     }, [] as { label: string; value: number }[]);
   };
+
   const options = {
     responsive: true,
     plugins: {
@@ -87,12 +96,30 @@ const GenerateChart = ({ node }: any) => {
       },
     },
   };
+  
+  useEffect(() => {
+    const generateChart = () => {
+      const randomIdx = Math.floor(Math.random() * optionsChart.length);
+      switch (randomIdx) {
+        case 0:
+          return <Bar data={chartData} options={options} />;
+        case 1:
+          return <Line data={chartData} options={options} />;
+        case 2:
+          return <Pie data={chartData} options={options} />;
+        default:
+          return null;
+      }
+    };
+
+    if (chartData?.labels?.length > 0) {
+      setRandomChart(generateChart());
+    }
+  }, [chartData]); // Run effect only when chartData changes
   return (
     <NodeViewWrapper>
       <div className="flex items-center gap-2">
-        {chartData.labels.length > 0 && (
-          <Bar data={chartData} options={options} />
-        )}
+        {randomChart}
       </div>
     </NodeViewWrapper>
   );

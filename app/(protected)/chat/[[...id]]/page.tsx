@@ -10,10 +10,11 @@ import { logout } from "@/actions/logout";
 import { Button } from "@/components/tailwind/ui/button";
 import { Tooltip } from "@/components/tailwind/ui/tooltip";
 import useChatStore from "@/hooks/chatStore";
-import ChatBox from "@/components/tailwind/ui/chatBox";
+import ChatBox from "@/components/tailwind/chatBox";
 import { CanvasLoading } from "@/components/Common/CanvasLoading";
 import { LuArrowUpNarrowWide } from "react-icons/lu";
 import ProposeChat from "@/components/tailwind/ui/proposeChat";
+import { FaRegStar } from "react-icons/fa";
 
 export default function Page() {
   const [open, setOpen] = useState(false);
@@ -89,19 +90,7 @@ export default function Page() {
           {!chatStarted && (
             <div className="flex flex-col items-center text-center mt-3">
               <div className="w-12 h-12 flex items-center justify-center dark:bg-gray-800 bg-cyan-300 rounded-full">
-                <svg
-                  className="w-6 h-6 text-blue-400"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"
-                  />
-                </svg>
+                <FaRegStar color="text-blue-400" className="w-6 h-6" />
               </div>
               <h1 className="text-2xl font-semibold mt-4">
                 Welcome To Our AI Power Editor

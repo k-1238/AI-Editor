@@ -10,7 +10,7 @@ import { useEffect, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import { defaultExtensions } from "./extensions";
 import GenerativeMenuSwitch from "./generative/generative-menu-switch";
-import { ChartExtension } from "./ui/ChartExtension";
+import { ChartExtension } from "./extensions/ChartExtension";
 import { Tooltip } from "./ui/tooltip";
 import { Plus, Redo2Icon, Undo2Icon } from "lucide-react";
 import { useSessionUUID } from "@/app/providers";
@@ -22,7 +22,7 @@ import { ColorSelector } from "./selectors/color-selector";
 import html2canvas from 'html2canvas';
 import useChatStore from "@/hooks/chatStore";
 import { jsPDF } from "jspdf";
-import { ReadingLevelExtension } from "./ui/ReadingLevelExtension";
+import { ReadingLevelExtension } from "./extensions/ReadingLevelExtension";
 
 const extensions = [...defaultExtensions, ChartExtension, ReadingLevelExtension];
 
@@ -61,7 +61,7 @@ const TailwindAdvancedEditor = () => {
     }
   };
   const exportToPDF = async () => {
-    const editorElement:any = document.querySelector(".tiptap");
+    const editorElement: any = document.querySelector(".tiptap");
     if (!editorElement) {
       console.error('Editor content element not found');
       return;
@@ -73,12 +73,12 @@ const TailwindAdvancedEditor = () => {
         height: editorElement.scrollHeight
       });
       const imgData = canvas.toDataURL('image/png');
-      
+
       const pdf = new jsPDF('p', 'mm', 'a4');
       const imgProps = pdf.getImageProperties(imgData);
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-      
+
       let heightLeft = pdfHeight;
       let position = 0;
 
@@ -97,7 +97,7 @@ const TailwindAdvancedEditor = () => {
       console.error('Error exporting to PDF:', error);
     }
   };
-  
+
   useEffect(() => {
     setInitialContent(defaultEditorContent);
   }, []);
@@ -157,14 +157,14 @@ const TailwindAdvancedEditor = () => {
         <EditorContent
           initialContent={initialContent}
           extensions={extensions}
-          className="relative h-full min-h-full novel-tiptap-editor overflow-auto flex flex-col w-full border-muted bg-background sm:border sm:shadow-lg"
+          className="relative h-full min-h-full novel-tiptap-editor overflow-auto scrollbar-thin flex flex-col w-full border-muted bg-background sm:border sm:shadow-lg"
           editorProps={{
             handleDOMEvents: {
               keydown: (_view, event) => handleCommandNavigation(event),
             },
             attributes: {
               class:
-                "prose overflow-auto prose-lg dark:prose-invert prose-headings:font-title font-default focus:outline-none max-w-full",
+                "prose overflow-auto scrollbar-thin prose-lg dark:prose-invert prose-headings:font-title font-default focus:outline-none max-w-full",
             },
           }}
           onCreate={({ editor }) => setEditorInstance(editor)}

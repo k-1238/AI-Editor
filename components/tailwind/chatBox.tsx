@@ -1,5 +1,5 @@
 "use client";
-import { ScrollArea } from "./scroll-area";
+import { ScrollArea } from "./ui/scroll-area";
 import { UserCircleIcon } from "lucide-react";
 import { RiSparkling2Line } from "react-icons/ri";
 import useChatStore from "@/hooks/chatStore";
