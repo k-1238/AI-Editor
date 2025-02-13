@@ -110,7 +110,7 @@ const TailwindAdvancedEditor = () => {
 
   return (
     <div className="relative w-full mx-auto flex items-center justify-center h-[inherit]">
-      <div className="flex absolute right-5 top-5 z-10 mb-5 gap-3">
+      <div className="flex absolute right-5 top-5 z-10 mb-5 gap-3 items-center justify-self-center break-words">
         <div className="rounded-lg bg-accent px-2 py-1 text-sm text-muted-foreground">
           <Tooltip content="New Chat" className="text-sm">
             <Plus

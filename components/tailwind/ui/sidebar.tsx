@@ -121,9 +121,9 @@ export default function Sidebar({ open }: SidebarProps) {
   }, [chats, searchStream]);
   return (
     <div
-    className={`h-full sm:min-w-[289px] ${
-      !open && "max-sm:!w-0 border-r-2"
-    }  overflow-x-hidden flex flex-col`}>
+      className={`h-full ${
+        !open && "max-sm:!w-0 border-r-2"
+      }  overflow-x-hidden flex flex-col`}>
       <div className="flex flex-row py-5 px-2">
         <Sparkles className="h-15 w-15 text-[#9f00d9]" size={40} />
         <div className="flex ml-4 w-full">
@@ -157,7 +157,7 @@ export default function Sidebar({ open }: SidebarProps) {
         {hasNext && <div ref={observerRef} />}
       </div>
       <div className="flex items-center justify-center py-4 px-2">
-        {!chatStarted && (<ProposeChat />)}
+        {!chatStarted && <ProposeChat />}
       </div>
     </div>
   );
