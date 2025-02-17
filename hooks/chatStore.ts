@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { z } from "zod";
 import { EditorInstance } from "novel";
 
-type Chat = {
+export type Chat = {
   created_at: string;
   session_id: string;
   content: string;
