@@ -9,7 +9,7 @@ interface InputProps extends React.ComponentProps<"input"> {
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, type, icon, onIconClick, ...props }, ref) => {
     const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-      if(event.key === "Enter" && onIconClick) {
+      if (event.key === "Enter" && onIconClick) {
         onIconClick();
       }
     }
