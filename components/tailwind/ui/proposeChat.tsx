@@ -11,7 +11,7 @@ import { useSessionUUID } from "@/app/providers";
 type ProposeChatProps = {
     className?: string;
 }
-const ProposeChat = ({className} : ProposeChatProps) => {
+const ProposeChat = ({ className }: ProposeChatProps) => {
     const [value, setValue] = useState<string>("");
     const [isThinking, setIsThinking] = useState(false);
     const { addMsg, updateLastAiMsg, setChatStarted, chatStarted } = useChatStore();
@@ -61,7 +61,7 @@ const ProposeChat = ({className} : ProposeChatProps) => {
         if (!chatStarted) {
             setChatStarted(true)
         }
-        if(value === "") {
+        if (value === "") {
             return;
         }
         addMsg({
