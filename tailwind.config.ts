@@ -81,13 +81,17 @@ const config = {
       },
     },
   },
-  plugins: [require("tailwindcss-animate"), require("@tailwindcss/typography"), function ({ addUtilities }: any) {
-    addUtilities({
-      ".scrollbar-thin": {
-        "scrollbar-width": "thin"
-      }
-    })
-  }],
+  plugins: [
+    require("tailwindcss-animate"),
+    require("@tailwindcss/typography"),
+    function ({ addUtilities }: any) {
+      addUtilities({
+        ".scrollbar-thin": {
+          "scrollbar-width": "thin",
+        },
+      });
+    },
+  ],
 } satisfies Config;
 
 export default config;

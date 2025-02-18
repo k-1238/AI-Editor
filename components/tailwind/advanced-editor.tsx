@@ -23,13 +23,20 @@ import html2canvas from "html2canvas";
 import useChatStore from "@/hooks/chatStore";
 import { jsPDF } from "jspdf";
 import axios from "axios";
+import CrazySpinner from "./ui/icons/crazy-spinner";
+import LoadingCircle from "./ui/icons/loading-circle";
 
-const extensions = [
-  ...defaultExtensions,
-  ChartExtension,
-];
+const extensions = [...defaultExtensions, ChartExtension];
 
-const readingLevels = ["Basic", "advanced", "original", "Intermediate", "Professional", , "Semi-professional"] as const;
+const readingLevels = [
+  "Basic",
+  "advanced",
+  "original",
+  "Intermediate",
+  "Professional",
+  ,
+  "Semi-professional",
+] as const;
 
 const TailwindAdvancedEditor = () => {
   const [initialContent, setInitialContent] = useState<null | JSONContent>(
@@ -111,7 +118,10 @@ const TailwindAdvancedEditor = () => {
   const transformTextWithAI = async (text: string, level: string) => {
     setLoading(true);
     try {
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/rewrite_text`, { text, level });
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/rewrite_text`,
+        { text, level }
+      );
       return response.data.rewritten_text;
     } catch (error) {
       console.error("OpenAI API error:", error);
@@ -146,32 +156,28 @@ const TailwindAdvancedEditor = () => {
     <div className="relative w-full mx-auto flex items-center justify-center h-[inherit]">
       <div className="flex absolute right-5 top-5 z-10 mb-5 gap-3 items-center justify-self-center break-words">
         <div className="rounded-lg bg-accent px-2 py-1 text-sm text-muted-foreground space-x-2">
-
           <select
             value={readingLevel}
             onChange={(e) => {
-              const selectedLevel = e.target.value as (typeof readingLevels)[number]; // Ensure valid type
+              const selectedLevel = e.target
+                .value as (typeof readingLevels)[number]; // Ensure valid type
               if (readingLevels.includes(selectedLevel) && selectedLevel) {
                 setReadingLevel(selectedLevel);
               }
             }}
-            className="border p-2 rounded"
-          >
+            className="border p-2 rounded">
             {readingLevels.map((level) => (
               <option key={level} value={level}>
                 {level ? level.charAt(0).toUpperCase() + level.slice(1) : ""}
               </option>
             ))}
           </select>
-
           <button
             onClick={applyReadingLevel}
-            className="bg-blue-500 text-white p-2 rounded"
-            disabled={loading}
-          >
+            className="bg-blue-400 text-white p-2 rounded"
+            disabled={loading}>
             {loading ? "Processing..." : "Apply Reading Level"}
           </button>
-
         </div>
         <div className="rounded-lg bg-accent px-2 py-1 text-sm text-muted-foreground">
           <Tooltip content="New Chat" className="text-sm">
@@ -223,7 +229,7 @@ const TailwindAdvancedEditor = () => {
         <EditorContent
           initialContent={initialContent}
           extensions={extensions}
-          className="relative h-full min-h-full novel-tiptap-editor overflow-auto scrollbar-thin flex flex-col w-full border-muted bg-background sm:border sm:shadow-lg"
+          className="relative h-full min-h-full novel-tiptap-editor overflow-auto scrollbar-thin flex flex-col w-full bg-background border"
           editorProps={{
             handleDOMEvents: {
               keydown: (_view, event) => handleCommandNavigation(event),
