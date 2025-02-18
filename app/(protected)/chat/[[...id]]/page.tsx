@@ -135,8 +135,21 @@ export default function Page() {
               <div className="flex flex-col">
                 <div className="flex flex-row px-5 mt-3 items-center space-x-2 mb-2">
                   <Sparkles className="h-15 w-15 text-[#9f00d9]" size={40} />
-                  <div className="flex items-center cursor-pointer ml-4 w-full rounded-md justify-start px-2 py-3 border-2" onClick={makeNewChat}>
+                 {/* <div
+                    className="flex items-center cursor-pointer ml-4 w-full rounded-md justify-start px-2 py-3 border-2"
+                    onClick={makeNewChat}>
                     <FaPlus /> <span className="ml-2">New Chat</span>
+                  </div> */}
+                  <div
+                    className="flex items-center cursor-pointer ml-4 w-full rounded-md justify-start px-2 py-3"
+                    >
+                    <div className="relative z-10 flex w-full cursor-pointer items-center overflow-hidden rounded-md border p-[1.5px]" >
+                      <div className="animate-rotate absolute inset-0 h-full w-full rounded-md bg-[conic-gradient(#0ea5e9_20deg,transparent_120deg)]"></div>
+                      <div className="relative z-20 flex w-full rounded-[0.60rem] items-center p-2 " onClick={makeNewChat}>
+                        <FaPlus />
+                        <span className="ml-2">New Chat</span>
+                      </div>
+                    </div>
                   </div>
                   <div className="flex items-center cursor-pointer rounded-md p-3 border-2" onClick={() => { setChatStarted(!chatStarted), setShowSkeleton(false) }}>
                     <PanelRight
