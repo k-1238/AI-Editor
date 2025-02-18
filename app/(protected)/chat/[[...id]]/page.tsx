@@ -14,29 +14,30 @@ import ChatBox from "@/components/tailwind/chatBox";
 import { CanvasLoading } from "@/components/Common/CanvasLoading";
 import { LuArrowUpNarrowWide } from "react-icons/lu";
 import ProposeChat from "@/components/tailwind/ui/proposeChat";
-import { FaRegStar } from "react-icons/fa";
+import { FaPlus, FaRegStar } from "react-icons/fa";
+import Search from "@/components/tailwind/ui/animate-search/search";
+import { Sparkles, LucideLoader } from "lucide-react";
+import { PlusIcon } from "@radix-ui/react-icons";
+import { useSessionUUID } from "@/app/providers";
 
 export default function Page() {
   const [open, setOpen] = useState(false);
-  const { resetChats, chatStarted } = useChatStore();
+  const { resetChats, chatStarted, setChatStarted, clearChatMsgs, chatMsgs, editorInstance } = useChatStore();
   const [showSkeleton, setShowSkeleton] = useState(true);
   const [isOpenChatBox, setIsOpenChatBox] = useState(false);
-
+  const { setSessionId } = useSessionUUID();
   useEffect(() => {
+    console.log("useEffect")
     if (chatStarted) {
+      console.log("started: ", chatStarted)
       const timer = setTimeout(() => {
         setShowSkeleton(false);
       }, 1500); // Show skeleton for 500ms
-
       return () => clearTimeout(timer);
     }
   }, [chatStarted]);
   useEffect(() => {
     const handleResize = () => {
-      // if (window.innerWidth >= 768) {
-      //   // This assumes desktop starts at 1024px
-      //   setOpen(false); // Automatically close on desktop
-      // }
       if (window.innerWidth >= 1024) setIsOpenChatBox(false);
     };
 
@@ -47,13 +48,24 @@ export default function Page() {
       window.removeEventListener("resize", handleResize);
     };
   }, []);
+  const makeNewChat = () => {
+    setChatStarted(false);
+    setSessionId();
+    clearChatMsgs();
+    setShowSkeleton(true)
+    if (editorInstance) {
+      if (editorInstance.getText() !== "") {
+        editorInstance.commands.clearContent();
+      }
+    }
+    setChatStarted(!chatStarted);
+  };
   return (
     <div className="flex flex-row h-screen">
       {/* Sidebar Component */}
-      <div
-        className={`transition-all duration-300 ${
-          chatStarted ? "sm:-ml-[289px]" : "ml-0"
-        }`}>
+      {/* <div
+        className={`transition-all duration-300 ${chatStarted ? "sm:-ml-[323px]" : "ml-0"
+          }`}>
         <Sidebar />
       </div>
 
@@ -61,17 +73,18 @@ export default function Page() {
         <SheetContent>
           <Sidebar open={open} />
         </SheetContent>
-      </Sheet>
+      </Sheet> */}
       {/* Main Content */}
       <div
-        className={`flex transition-all duration-700 flex-col flex-1 items-center gap-4 py-4 sm:px-5 ${
-          chatStarted ? "lg:w-3/5" : "lg:w-full"
-        }`}>
+        className={`flex transition-all duration-700 flex-col flex-1 items-center gap-4 py-4 sm:px-5 ${chatStarted ? "lg:w-3/5" : "lg:w-full"
+          }`}>
         <div className={`flex w-full items-center gap-2 px-4`}>
           <PanelRight
-            className={`${!chatStarted && "sm:hidden"} cursor-pointer`}
+            className={`${(chatStarted && chatMsgs.length > 0) || (!chatStarted && chatMsgs.length === 0) ? "sm:hidden" : "block"} cursor-pointer`}
             onClick={() => {
-              setOpen(!open);
+              if (chatMsgs.length > 0)
+                setChatStarted(true);
+              setShowSkeleton(true)
             }} // Toggle Sidebar visibility on click
           />
           <Tooltip content="Logout" className="text-sm">
@@ -88,9 +101,8 @@ export default function Page() {
         </div>
 
         <div
-          className={`w-full py-5 flex flex-col ${
-            chatStarted && "justify-between"
-          }`}>
+          className={`w-full py-5 flex flex-col ${chatStarted && "justify-between"
+            }`}>
           {/* Welcome Board */}
           {!chatStarted && (
             <div className="flex flex-col items-center text-center mt-3">
@@ -106,27 +118,38 @@ export default function Page() {
 
           {/* Editor & Chat */}
           <div
-            className={`flex flex-1 mt-5 shadow-md ${
-              chatStarted ? "h-[85vh]" : "h-[64vh]"
-            }`}>
+            className={`flex flex-1 mt-5 bg-[#f3f6fb] shadow-md ${chatStarted ? "h-[85vh]" : "h-[64vh]"
+              }`}>
             <TailwindAdvancedEditor />
           </div>
         </div>
       </div>
       {chatStarted && (
         <>
-          <div className="hidden lg:flex w-2/5 ml-auto overflow-auto h-[100vh] dark:border-l-2">
+          <div className="hidden lg:flex w-1/5 ml-auto overflow-auto h-[100vh] light  dark:border-l-2">
             {showSkeleton ? (
               <div className="w-full p-4">
                 <CanvasLoading />
               </div>
             ) : (
               <div className="flex flex-col">
+                <div className="flex flex-row px-5 mt-3 items-center space-x-2 mb-2">
+                  <Sparkles className="h-15 w-15 text-[#9f00d9]" size={40} />
+                  <div className="flex items-center cursor-pointer ml-4 w-full rounded-md justify-start px-2 py-3 border-2" onClick={makeNewChat}>
+                    <FaPlus /> <span className="ml-2">New Chat</span>
+                  </div>
+                  <div className="flex items-center cursor-pointer rounded-md p-3 border-2" onClick={() => { setChatStarted(!chatStarted), setShowSkeleton(false) }}>
+                    <PanelRight
+                      className={`cursor-pointer`}
+                    />
+                  </div>
+                </div>
                 <ChatBox />
                 <ProposeChat className="mt-auto mb-3 px-2" />
               </div>
             )}
           </div>
+          {/*Show the ChatBox in Mobile View */}
           <Sheet
             open={isOpenChatBox}
             onOpenChange={() => setIsOpenChatBox(false)}>
