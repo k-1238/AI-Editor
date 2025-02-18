@@ -22,13 +22,14 @@ import { ColorSelector } from "./selectors/color-selector";
 import html2canvas from "html2canvas";
 import useChatStore from "@/hooks/chatStore";
 import { jsPDF } from "jspdf";
-import { ReadingLevelExtension } from "./extensions/ReadingLevelExtension";
+import axios from "axios";
 
 const extensions = [
   ...defaultExtensions,
   ChartExtension,
-  ReadingLevelExtension,
 ];
+
+const readingLevels = ["Basic", "advanced", "original", "Intermediate", "Professional", , "Semi-professional"] as const;
 
 const TailwindAdvancedEditor = () => {
   const [initialContent, setInitialContent] = useState<null | JSONContent>(
@@ -41,12 +42,12 @@ const TailwindAdvancedEditor = () => {
   const [openNode, setOpenNode] = useState(false);
   const [openColor, setOpenColor] = useState(false);
   const [openLink, setOpenLink] = useState(false);
-  const [level, setLevel] = useState(0);
+  const [readingLevel, setReadingLevel] = useState("standard");
   const { editorInstance, setEditorInstance, setChatStarted, clearChatMsgs } =
     useChatStore();
+  const [loading, setLoading] = useState(false);
   const debouncedUpdates = useDebouncedCallback(
     async (editor: EditorInstance) => {
-      setLevel(editor.storage.readingLevel.level);
       // Extract chart data from the editor content
       setCharsCount(editor.storage.characterCount.words());
       setSaveStatus("Saved");
@@ -106,11 +107,72 @@ const TailwindAdvancedEditor = () => {
   useEffect(() => {
     setInitialContent(defaultEditorContent);
   }, []);
+
+  const transformTextWithAI = async (text: string, level: string) => {
+    setLoading(true);
+    try {
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/rewrite_text`, { text, level });
+      return response.data.rewritten_text;
+    } catch (error) {
+      console.error("OpenAI API error:", error);
+      return text; // Return original if API fails
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const applyReadingLevel = async () => {
+    if (!editorInstance) return;
+
+    const { from, to } = editorInstance.state.selection;
+    const selectedText = editorInstance.state.doc.textBetween(from, to);
+    const fullText = editorInstance.getText(); // Get full text
+    const targetText = selectedText || fullText;
+
+    if (!targetText) return;
+
+    const newText = await transformTextWithAI(targetText, readingLevel);
+
+    if (selectedText) {
+      editorInstance.commands.setTextSelection({ from, to });
+      editorInstance?.commands.insertContent(newText);
+    } else {
+      editorInstance.commands.setContent(newText);
+    }
+  };
   if (!initialContent) return null;
 
   return (
     <div className="relative w-full mx-auto flex items-center justify-center h-[inherit]">
       <div className="flex absolute right-5 top-5 z-10 mb-5 gap-3 items-center justify-self-center break-words">
+        <div className="rounded-lg bg-accent px-2 py-1 text-sm text-muted-foreground space-x-2">
+
+          <select
+            value={readingLevel}
+            onChange={(e) => {
+              const selectedLevel = e.target.value as (typeof readingLevels)[number]; // Ensure valid type
+              if (readingLevels.includes(selectedLevel) && selectedLevel) {
+                setReadingLevel(selectedLevel);
+              }
+            }}
+            className="border p-2 rounded"
+          >
+            {readingLevels.map((level) => (
+              <option key={level} value={level}>
+                {level ? level.charAt(0).toUpperCase() + level.slice(1) : ""}
+              </option>
+            ))}
+          </select>
+
+          <button
+            onClick={applyReadingLevel}
+            className="bg-blue-500 text-white p-2 rounded"
+            disabled={loading}
+          >
+            {loading ? "Processing..." : "Apply Reading Level"}
+          </button>
+
+        </div>
         <div className="rounded-lg bg-accent px-2 py-1 text-sm text-muted-foreground">
           <Tooltip content="New Chat" className="text-sm">
             <Plus
@@ -148,9 +210,6 @@ const TailwindAdvancedEditor = () => {
               : "hidden"
           }>
           {charsCount} Words
-        </div>
-        <div className="rounded-lg bg-accent px-2 py-1 text-sm text-muted-foreground">
-          {level} Reading Level
         </div>
         <div
           className="rounded-lg bg-accent px-2 py-1 text-sm text-muted-foreground cursor-pointer"
