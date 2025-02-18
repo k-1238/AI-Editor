@@ -23,8 +23,6 @@ import html2canvas from "html2canvas";
 import useChatStore from "@/hooks/chatStore";
 import { jsPDF } from "jspdf";
 import axios from "axios";
-import CrazySpinner from "./ui/icons/crazy-spinner";
-import LoadingCircle from "./ui/icons/loading-circle";
 
 const extensions = [...defaultExtensions, ChartExtension];
 
