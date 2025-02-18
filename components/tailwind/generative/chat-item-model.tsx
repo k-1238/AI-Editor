@@ -1,10 +1,11 @@
-import { MessageCircle, Check, LucideLoader } from "lucide-react";
+import { MessageCircle, LucideLoader } from "lucide-react";
 import {
   Dialog,
   DialogContent,
   DialogTitle,
   DialogTrigger,
 } from "@/components/tailwind/ui/dialog";
+import { TbMessageDots } from "react-icons/tb";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import HistoryItem from "../ui/historyItem";
 import { Button } from "../ui/button";
@@ -51,24 +52,24 @@ const ChatItemModel = ({ chat, isActive, setIsActive }: ChatItemModelProps) => {
       {/* Use session_id or unique chat ID */}
       <DialogTrigger asChild>
         <Button
-          className="flex w-full items-center justify-between rounded px-2 py-1.5 text-sm"
+          className={`flex items-center space-x-2 rounded px-2 py-1.5 text-sm ${isActive === chat.session_id ? "rounded-lg border-l-2 border-blue-400" : "rounded-sm"
+            }`}
           variant={isActive === chat.session_id ? "secondary" : "ghost"}
-          onClick={() => {
+          onClick={(e) => {
+            e.stopPropagation()
             setIsActive(chat.session_id);
             handleFetchChatsBySessionID(chat.session_id);
           }}>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2 w-full">
             <div className="rounded-sm border p-1">
-              <MessageCircle className="h-4 w-4" />
+              <TbMessageDots
+                className="h-4 w-4" />
             </div>
-            <span>
-              {chat.title && chat.title.length > 25
-                ? chat.title.slice(0, 25)
-                : chat.title}
+            <span className="truncate w-56">
+              {chat.title && chat.title.length > 25 ? chat.title.slice(0, 25) : chat.title}
               ...
             </span>
           </div>
-          {isActive === chat.session_id && <Check className="h-4 w-4" />}
         </Button>
       </DialogTrigger>
       <DialogContent className="flex max-w-3xl items-center flex-col h-[calc(70vh-24px)]">
