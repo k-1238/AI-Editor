@@ -68,7 +68,7 @@ export default function Page() {
     setChatStarted(!chatStarted);
   };
   return (
-    <div className="flex flex-row h-screen">
+    <div className="flex flex-row h-screen py-5 px-14">
       {/* Sidebar Component */}
       {/* <div
         className={`transition-all duration-300 ${chatStarted ? "sm:-ml-[323px]" : "ml-0"
@@ -81,6 +81,69 @@ export default function Page() {
           <Sidebar open={open} />
         </SheetContent>
       </Sheet> */}
+      {chatStarted && (
+        <>
+          <div className="hidden lg:flex w-1/5 ml-auto overflow-auto light  dark:border-r-2">
+            {showSkeleton ? (
+              <div className="w-full p-4">
+                <CanvasLoading />
+              </div>
+            ) : (
+              <div className="flex flex-col">
+                <div className="flex flex-row px-5 mt-3 items-center space-x-2 mb-2">
+                  <Sparkles className="h-15 w-15 text-[#9f00d9]" size={40} />
+                  {/* <div
+                    className="flex items-center cursor-pointer ml-4 w-full rounded-md justify-start px-2 py-3 border-2"
+                    onClick={makeNewChat}>
+                    <FaPlus /> <span className="ml-2">New Chat</span>
+                  </div> */}
+                  <div
+                    className="flex items-center cursor-pointer ml-4 w-full rounded-md justify-start px-2 py-3"
+                    onClick={makeNewChat}>
+                    <div className="relative z-10 flex w-full cursor-pointer items-center overflow-hidden rounded-md border p-[1.5px]">
+                      <div className="animate-rotate absolute inset-0 rounded-md bg-[conic-gradient(#60a6fb_20deg,transparent_120deg)]"></div>
+                      <div className="relative z-20 flex w-full rounded-[0.60rem] justify-start items-center p-2">
+                        <FaPlus />
+                        <div className="flex items-center ml-2 flex-grow justify-center">
+                          <span>New Chat</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div
+                    className="flex items-center cursor-pointer rounded-md p-3 border-2"
+                    onClick={() => {
+                      setChatStarted(!chatStarted), setShowSkeleton(false);
+                    }}>
+                    <PanelRight className={`cursor-pointer`} />
+                  </div>
+                </div>
+                <ChatBox />
+                <ProposeChat className="mt-auto mb-40 px-2" />
+              </div>
+            )}
+          </div>
+          {/*Show the ChatBox in Mobile View */}
+          <Sheet
+            open={isOpenChatBox}
+            onOpenChange={() => setIsOpenChatBox(false)}>
+            <SheetContent side={"bottom"} className="h-[90vh] overflow-auto">
+              <ChatBox />
+              <ProposeChat className="mt-auto mb-7 px-2" />
+            </SheetContent>
+          </Sheet>
+          <div className="absolute bottom-3 left-1/2 lg:hidden -lg flex size-10 animate-bounce items-center justify-center rounded-full bg-white p-2 ring-1 ring-gray-900/5 dark:bg-[#9f00d9] dark:ring-white/20">
+            <Tooltip content="Chat" className="text-sm">
+              <LuArrowUpNarrowWide
+                color="blue"
+                className="cursor-pointer"
+                onClick={() => setIsOpenChatBox(true)}
+              />
+            </Tooltip>
+          </div>
+        </>
+      )}
       {/* Main Content */}
       <div
         className={`flex transition-all duration-700 flex-col flex-1 items-center gap-4 py-4 sm:px-5 ${
@@ -138,67 +201,6 @@ export default function Page() {
           </div>
         </div>
       </div>
-      {chatStarted && (
-        <>
-          <div className="hidden lg:flex w-1/5 ml-auto overflow-auto h-[100vh] light  dark:border-l-2">
-            {showSkeleton ? (
-              <div className="w-full p-4">
-                <CanvasLoading />
-              </div>
-            ) : (
-              <div className="flex flex-col">
-                <div className="flex flex-row px-5 mt-3 items-center space-x-2 mb-2">
-                  <Sparkles className="h-15 w-15 text-[#9f00d9]" size={40} />
-                  {/* <div
-                    className="flex items-center cursor-pointer ml-4 w-full rounded-md justify-start px-2 py-3 border-2"
-                    onClick={makeNewChat}>
-                    <FaPlus /> <span className="ml-2">New Chat</span>
-                  </div> */}
-                  <div className="flex items-center cursor-pointer ml-4 w-full rounded-md justify-start px-2 py-3">
-                    <div className="relative z-10 flex w-full cursor-pointer items-center overflow-hidden rounded-md border p-[1.5px]">
-                      <div className="animate-rotate absolute inset-0 rounded-md bg-[conic-gradient(#60a6fb_20deg,transparent_120deg)]"></div>
-                      <div className="relative z-20 flex w-full rounded-[0.60rem] justify-start items-center p-2">
-                        <FaPlus />
-                        <div className="flex items-center ml-2 flex-grow justify-center">
-                          <span>New Chat</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div
-                    className="flex items-center cursor-pointer rounded-md p-3 border-2"
-                    onClick={() => {
-                      setChatStarted(!chatStarted), setShowSkeleton(false);
-                    }}>
-                    <PanelRight className={`cursor-pointer`} />
-                  </div>
-                </div>
-                <ChatBox />
-                <ProposeChat className="mt-auto mb-3 px-2" />
-              </div>
-            )}
-          </div>
-          {/*Show the ChatBox in Mobile View */}
-          <Sheet
-            open={isOpenChatBox}
-            onOpenChange={() => setIsOpenChatBox(false)}>
-            <SheetContent side={"bottom"} className="h-[90vh] overflow-auto">
-              <ChatBox />
-              <ProposeChat className="mt-auto mb-3 px-2" />
-            </SheetContent>
-          </Sheet>
-          <div className="absolute bottom-3 left-1/2 lg:hidden -lg flex size-10 animate-bounce items-center justify-center rounded-full bg-white p-2 ring-1 ring-gray-900/5 dark:bg-[#9f00d9] dark:ring-white/20">
-            <Tooltip content="Chat" className="text-sm">
-              <LuArrowUpNarrowWide
-                color="blue"
-                className="cursor-pointer"
-                onClick={() => setIsOpenChatBox(true)}
-              />
-            </Tooltip>
-          </div>
-        </>
-      )}
     </div>
   );
 }
